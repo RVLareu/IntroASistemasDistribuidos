@@ -440,6 +440,143 @@ Cada torrent tiene un nodo llamado *tracker*. Cuando un *peer* se suma al *torre
  2 tipos de aplicaciones de red: una opera bajo un especifico protocolo estandar (RFC) y otro que no, donde el porotocolo de la capa de aplicacion es determinado por el equipo de desarrollo. Debe definirse si usar TCP o UDP.
  
  
+ En UDP, el paquete tiene direccion de destino (IP). Tambien se debe indiar el puerto para identificar al proceso en el host de destino.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160672250-bfa8c588-2b0e-46c9-be6c-68705ab7af78.png)
+
+### Aplicacion UDP
+ 
+Del lado del cliente
+ 
+```python
+# traigo el modulo socket
+from socket import * 
+ 
+# defino nombre de host (IP o hostname) y puerto 
+serverName = ’hostname’
+serverPort = 12000
+ 
+# Crea socket
+# AF_INET : IPv4, SOCK_DGRAM: UDP
+clientSocket = socket(AF_INET, SOCK_DGRAM)
+ 
+# Mensaje a enviar, capturo lo que tipee el usuario
+message = raw_input(’Input lowercase sentence:’)
+ 
+# Envio el mensaje, previamente transformandolo de string a byte
+clientSocket.sendto(message.encode(),(serverName, serverPort))
+ 
+# Recibo respuesta del servidor
+modifiedMessage, serverAddress = clientSocket.recvfrom(2048)
+
+print(modifiedMessage.decode())
+ 
+# Cierro el socket
+clientSocket.close()
+ 
+```
+ 
+Del lado del Servidor
+
+```python
+ 
+from socket import *
+
+serverPort = 12000
+
+serverSocket = socket(AF_INET, SOCK_DGRAM)
+
+# Asigna el puerto al socket
+serverSocket.bind((’’, serverPort))
+ 
+print(”The server is ready to receive”)
+while True:
+ # Recibo del  cliente
+ message, clientAddress = serverSocket.recvfrom(2048)
+ # Convierte mensaje a string, pasa a uppercase
+ modifiedMessage = message.decode().upper()
+ # Envia el string encodeandolo previamente
+ serverSocket.sendto(modifiedMessage.encode(), clientAddress)
+
+```
+ 
+### Aplicacion TCP
+ 
+A diferencia de UDP, una vez establecida la conexion, no hace falta aclarar la direccion IP de destino en cada paquete.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160673843-36d457db-5f88-4bb7-9399-0b66e88f0e80.png)
+
+Lado del cliente
+
+
+```python
+
+ from socket import *
+serverName = ’servername’
+serverPort = 12000
+
+# SOCK_STREAM: TCP
+clientSocket = socket(AF_INET, SOCK_STREAM)
+
+# Establece conexion TCP. El handshake ocurre aca
+clientSocket.connect((serverName, serverPort))
+sentence = raw_input(’Input lowercase sentence:’)
+
+# Notar no se aclara la dirección IP destino
+clientSocket.send(sentence.encode())
+modifiedSentence = clientSocket.recv(1024)
+print(’From Server: ’, modifiedSentence.decode())
+
+# Genera un mensaje TCP al TCP en el servidor
+clientSocket.close()
+
+
+```
+
+![image](https://user-images.githubusercontent.com/71232328/160674039-75f416c6-83ae-47bb-a07b-f5cad85da805.png)
+
+
+Del lado del servidor
+
+
+```python
+
+from socket import *
+serverPort = 12000
+serverSocket = socket(AF_INET, SOCK_STREAM)
+
+# Es el socket de bienvenida
+serverSocket.bind((’’, serverPort))
+
+# Esperamos a que un socket cliente "toque la puerta".
+ 
+serverSocket.listen(1)
+print(’The server is ready to receive’)
+while True:
+ 
+ # Cuando un cliente "toca la puerta" se invoca accept(), que crea un nuevo
+ # socket en el servidor dedicado a ese cliente en particular
+ connectionSocket, addr = serverSocket.accept()
+ sentence = connectionSocket.recv(1024).decode()
+ capitalizedSentence = sentence.upper()
+ connectionSocket.send(capitalizedSentence.encode())
+ 
+ # Cerramos el socket dedicado al cliente, pero el de bienvenida
+ # sigue abierto, por lo que pueden conectarse nuevos clientes
+ connectionSocket.close()
+
+```
+
+
+
+
+
+
+
+
+
+
+ 
 </details>
 
 
