@@ -5,7 +5,7 @@
 <details>
  <summary>  Capitulo 1 🍾 </summary> 
  
-
+ </br>
 
 *host* o *end systems*: dispositivos conectados a la red (lapotot, tablet, reloj, etc).
 
@@ -202,7 +202,9 @@ Malware (?)
 
 <details>
  
- <summary>Capitulo 2 🍾</summary>
+<summary> Capitulo 2 🍾</summary>
+ 
+</br>
  
 Al desarrollar una aplicación, hay que escribir software de tal manera que pueda correr en multiples sistemas (no es necesario en *routers* o *link-layer switches*, estos no funcionan en la capa de aplicación). La arquitectura de la aplicación está diseñada por el desarrollador, a diferencia de la arquitectura de la red. Esta puede ser cliente-servidor o *peer-to-peer*.
 
