@@ -337,9 +337,109 @@ En el header de SMTP van a aparecer: FROM, TO, SUBJECT. SMTP es un *push protoco
  
 ## DNS: Directory Service
  
+Para identificar un *host* se usan *hostnames*, pero estos nombres no permiten conocer su locacion en el internet. Entonces se los identifica con las direcciones IP (4 bytes), separados por "." donde cada byte en decimal va de 0 a 255. Es jerárquica. El DNS traduce de *hostname* a IP. DNS es una base de datos distribuida implementada en una jerarquoia de servidores DNS y un protocolo de la capa de aplicacion que permite a los *hosts* realizar consultas a la base de datos. DNS corre sobre UDP.DNS es usada por otro protocolos como HTTP y SMTP. La maquina del usuario hace de cliente. Luego de obtener la IP, el browser inicia la conexion TCP. DNS agrega delay.
+Servicios que provee DNS:
+ 
+* *Host aliasing*: mas de un nombre o alias. El mas completo es el canonico
+* *mail server aliasing*: por ej yahoo.com
+* *load distribution*: permite asociar varias IPs a un nombre canónico para distribuir la carga en varios servidores que repliquen lo mismo
+
+No conviene un servidor DNS centralizado:
+ * Falla y se cae todo
+ * Volumen de tráfico
+ * Distancia al servidor centralizado
+ * Mantenimiento, actualizando constantemente para un host nuevo
+ 
+Entonces se usa una base de datos descentralizada y jerárquica:
+ * servidores DNS raiz: dan IP de los TLD DNS servers
+ * *top-level domain (TLD) DNS servers*: devuelven IP de los *authorative DNS servers*
+ * *authoritative DNS servers*: mapea el nombre de los hosts a su IP.
+ 
+![image](https://user-images.githubusercontent.com/71232328/160653358-023c279d-bd3f-4376-8e43-265c05137b90.png)
+
+ El cliente contacta a un servidor raiz, que devuelve direcciones IP para serividores TLD con cierto dominio (com). El cliente luego contacta uno de estos, que devuelve direccion IP de un servidor *authorative* para cierta direccion (amazon.com). finalmente el cliente contacta un servidor *authorative* de la pagina (amazon.com) que devuelve la IP del host requerido (www. amazon. com). 
+ 
+ Además, cada ISP tien un servidor DNS local. Actúa como un proxy y forwardea la consulta a un servidor raiz.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160654734-f7f1413a-8d7a-4f8e-bed7-735d4c79a665.png)
+
+ Las *querys* son recursivas e iterativas. Recursivas por piden que se obtenga el mapeo en su nombre, iterativas porque responden inmediatamente. *querys* de DNS pueden ser recursivas o iterativas.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160655196-18c555d5-a09d-4e82-8355-98b000ddccc0.png)
 
  
+ #### DNS Caching
+ 
+ Para mejorar el delay del sistema DNS y disminuir los mensajes DNS. Se *cachea* el par *hostname*/IP. Esta tarea la realiza el servidor local DNS
+ 
+ #### Mensjaes DNS
+ 
+ Los servidores DNS almacenan *resource records (RRs)*. Cada respuesta DNS lleva uno o mas de estos: (Name, Value, Type, TTL).
+ 
+ * TTL: *time to live*, cuando borrarlo de la cache.
+ * Tipo: si es A, name es hostname y value es IP. Si es NS, name es domain y value es hostname de *authorative DNS server*. Si es CNAME, value es el *hostname* canonico y name el alias. Si es MX, vale es nombre canonico del servidor de mail con alias en name
+ 
+ Formato del mensaje:
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160656495-d382134f-d730-4af3-bb31-9714f60c48a8.png)
 
+ * Primeros 12 bytes son el header
+ * Question: información acerca de la *query* realizada. name, type.
+ * Answer: contiene RRs. Cada uno con Type, value y TTL
+ * Authority Section: tiene RRs de *authorative servers*
+ * Additional section: otros RRs que sirven de ayuda
+ 
+ #### Poner RRs en una base de datos
+ 
+ Se registra el dominio en una empresa *registrar* que lo pone en la base de datos DNS. Se registran en los TLD un tipo NS y otra A. Suponiendo se pasan 2 hostnames y dos IPs. También podria ser MX para un mail.
+ 
+ ## Peer-to-Peer File Distribution
+ 
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160658320-70011a61-7c83-45cd-8deb-a4f5fca36604.png)
+ 
+ Cada *peer* puede redistribuir una parte de un archivo grande. El tiempo de distribuicion es el tiempo que le lleva al archivo llegar a todos. En una cliente servidor va a ser el que le lleve al cliente con la menor tasa de descarga o lo que le lleve al servidor si tiene menor tasa de envio. Sube linealmente con la cantidad de clientes. En P2P, es mas complicado de calcular. Primero el servidor debe enviar aunque sea 1 vez todos los bits del archivo. La tasa de subida es la del servidor mas la de los peers
+
+ ![image](https://user-images.githubusercontent.com/71232328/160659048-1ec3206f-f611-43bf-80c5-f773ce7d8b6c.png)
+
+ #### BitTorrent
+ 
+ Todos los *peers* participando de la distribucion de un archivo son el *torrent*. El tamaño estandar de las porciones a distribuir es 256kb. Una vez que un *peer* obtiene todo el archivo puede irse o quedarse en el torrent ayudando a la subida del archivo
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160659398-eb886069-994b-4a1b-a4b7-151d62fc72b6.png)
+Cada torrent tiene un nodo llamado *tracker*. Cuando un *peer* se suma al *torrent*, se registra con el *tracker*, informando periodicamente si sigue en el torrent o no. Al sumarse a un torrent, se le envian los IPs de los *peers* (no todos) al recien llegado. Se intentan generar conexiones TCP con todos. De estos *peers* es de quien se obtienen las porciones del archivo. Primero va a pedir de los que no tiene, los que menos se repitan entre los vecinos (*rarest first*). Para enviar porciones de archivo, se prioriza a los que esten suministrando data a la tasa más alta. Se elige a los 4 *peers* (*Unchoked*) que mas rapido esten suministrando data y se les envia. Esto se calcula cada 10 segundos. Además cada 30 segundos se elige un *peer* al azar (*optmistically unchoked*).
+ 
+ Otra aplicacion de P2P es *Distributed Hash Table (DHT)*. Es una base de datos distribuida entre los *peers*
+ 
+ ## Streaming de video y distribucion de contenido
+ 
+ Cuanto más alto el bitrate, mejor la calidad del video. 4K precisa aprox 10Mbps. Se crean varias compresiones y se envian a distintas tasas. El usuario elige cual ver en base a su ancho de banda.
+ 
+ En HTTP streaming el video se guarda en un servidor HTTP. En el lado del cliente, una vez que se pasa un umbral en el buffer de recepcion se empieza a reproducir el video. La contra es que todos los clientes reciben los mismo auqnue tengan distinto ancho de banda. Surge el *Dynamic Adaptive Streamig over HTTP (DASH)*, el video se *encodea* en distintas versiones cada una con un bitrate distinto (distinta calidad. El cliente solicita porciones del video dinamicamente (cuando el ancho de banda es alto solicita mejor calidad y viceversa). Cada version del video se guarda en el server HTTP con una URL distinta. En el server HTTP hay un *manifest file* con las URL a estas versiones.
+ 
+ #### Content Distribution Network (CDN)
+ 
+ Casi todas las plataformas de streaming usan CDN. Servidores repartidos geograficamente que almacenan copias multimedia. CDN puede ser privado (Google) o *third-party*.
+ Politicas de ubicacion:
+ * *Enter Deep*: colocar servidores en access ISPs. Se está mas cerca de los *end systems*. Muy distribuido, mas dificil de mantener.
+ * *Bring Home*: servidores en menos lugares (por ej IXPs). Mas fácil de mantener a expensas de un mayor delay
+ 
+ Cuando se hace una request de un video, CDN la intercepta y determina el servidor CDN más conveniente y redirecciona la request. La intersepcion se logra haciendo uso de la DNS. 
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160663016-832a77c1-3f8f-4cd8-8cce-34fc2fed32a7.png)
+ 
+ Como determinar el cluster de CDN más conveniente? *cluster selection strategy*:
+ 
+ * Más cercano geograficamente
+ * *real time measurements*: toman medidas del delay para determinar el más cercano en cuanto a tiempo y no distancia
+
+ También es posible el caso de P2P streaming, muy similar a lo comentado en la seccion de P2P
+ 
+ ## Socket Programming
+ 
+ 2 tipos de aplicaciones de red: una opera bajo un especifico protocolo estandar (RFC) y otro que no, donde el porotocolo de la capa de aplicacion es determinado por el equipo de desarrollo. Debe definirse si usar TCP o UDP.
+ 
+ 
 </details>
 
 
