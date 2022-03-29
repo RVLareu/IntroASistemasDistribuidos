@@ -200,7 +200,147 @@ Malware (?)
 </details>
 
 
+<details>
+ 
+ <summary>Capitulo 2 🍾</summary>
+ 
+Al desarrollar una aplicación, hay que escribir software de tal manera que pueda correr en multiples sistemas (no es necesario en *routers* o *link-layer switches*, estos no funcionan en la capa de aplicación). La arquitectura de la aplicación está diseñada por el desarrollador, a diferencia de la arquitectura de la red. Esta puede ser cliente-servidor o *peer-to-peer*.
 
+En la arquitectura cliente-servidor , siempre hay un *host* llamado servidor que recibe peticiones de otros *host* llamados clientes. En esta arquitectura los clientes no se comunican directamente entre si. El servidor tiene una dirección IP fija. Para aplicaciones con muchos clientes, se tiene un *data center* con varios *host* creando un servidor virtual grande.
+ 
+En la arquitectura P2P no hay servidores dedicados, se basa en la comunicacion entre usuarios (ej: Torrent). Esta arquitectura es auto escalable.
+ 
+### Comunicacion
+ 
+Los que se comunican no son los programas, sino los procesos en diferentes (o el mismo) *end systes*. Lo hacen mediante mensajes. En general en una comunicacion, uno es el cliente y el otro el servidor. El que inicia la conexion es el cliente, el que espera a ser conectado, el servidor. Los mensajes se envian y reciben a través de una interfaz de software llamada *socket*. El *socket* es la interfaz entre la capa de aplicacion y la de transporte. También llamada *application programming interface (API)* entre la aplicacion y la red.
+ 
+Para identificar al proceso que recibe mensajes debe tenerse la direccion del host (IP) y un algo que identifique al proceso receptor en el host de destino. Al host lo define la dirección IP (32 bits). Para identificar al proceso, su utiliza el número de puerto.
+ 
+La aplicacion envia mensajes por el socket, la capa de transporte debe llevarlos al socket de destino. Un protocolo de la capa de transporte puede ofrecer varios servicios:
+
+* *Reliable Data Transfer*: asegura que no habrá pérdida de paquetes. Si no lo asegura, esto puede ser tolerable para ciertas aplicaciones (*loss-tolerant applications*) pero no para otras como son las aplicaciones multimedia
+* *Throughput*: asegura una tasa mínima de **r** bits/sec. Las aplicaciones que requieren una tasa especifica son *bandwidth-sensitive applications*. Las que no so *elastic applications*.
+* *Timing*: un tiempo máximo de arribo del paquete desde que sale hasta que llega al socket receptor (delay).
+* *Security*: puede proveer mas de un servicio de seguridad. Puede encriptar los datos al salir y desencriptarlos al llegar.
+ 
+### Servicios de transporte provistos por internet
+ 
+Las redes TCP/IP tienen 2 protocolos de transporte: UDP y TCP.
+ 
+Servicios de TCP:
+
+* *Connection-oriented servide*: cliente y servidor intercambian informacion antes de que empiezen a fluir los mensajes de la aplicacion (*handshake*). Luego de esto se dice que existe la conexion TCP. Pueden enviarse mensajes al mismo tiempo. Una vez finalizada, debe destruirse la conexion.
+* *Reliable data transfer*: se va a enviar toda la data sin errores y en orden.
+* *congestion-control mechanism*
+ 
+*TCP-enhanced-with-SSL (Secure Sockets Layer)* agrega seguridad (encripta, autenticacion de *end point*, etc).
+ 
+Servicios de UDP:
+ 
+* *connectionless*: no hay *handshake*
+* *unreliable data transfer*: no garantiza que llege el mensaje. Pueden llegar en desorden
+* No tiene mecanismo de control de congestion
+* El lado que envia, puede hacerlo al *rate* que quiera.
+ 
+En ambos casos, no se proveen servicios para *throughput* y *timing*.
+ 
+### Protocolos de capa de aplicación
+ 
+Definen como los procesos de aplicaciones se envian mensajes entre ellas:
+* tipo (request o respuesta)
+* Sintaxis (campos)
+* Semantica (qué contienen los campos)
+* Reglas para cuándo enviar y recibir mensajes
+
+## Web y HTTP
+ 
+*HyperText Transfer Protocol (HTTP)* se implementa en el cliente y en el servidor. Web browsers implementan el lado del cliente y Web Servers el lado del servidor. HTTP usa TCP como protocolo de transporte.
+ 
+![image](https://user-images.githubusercontent.com/71232328/160632290-47bcc71e-05ac-40d4-b088-564287af5e29.png)
+
+El servidor no guarda informacion del cliente, por lo que se dice que HTTP es *stateless protocol*.
+ 
+### Tipos de conexiones
+ 
+Cuando hay interacciones cliente-servidor debe definirse si las request/respuesta van en la misma conexion TCP (*persistent connections*) o en distintas (*non-persistent connections*). Por default HTTP usa *persistent connections*. En *non-persistent connections* puede ocurrir cierto paralelismo.
+
+*Round-trip-time (RTT)*: tiempo que le toma a un paquete viajar desde el cliente al servidor y volver. Incluye delay de propagacion, delay de cola y de procesamiento.
+ 
+![image](https://user-images.githubusercontent.com/71232328/160634079-c4d20bf4-45b9-46e4-9f0a-c5f635d36eb8.png)
+ 
+Se observa que cada conexion tiene un delay de 2 RTT, gran contra en *non-persistent connections*.
+ 
+## Formato del mensjae HTTP
+ 
+Hay dos tipos de mensaje: request y respuesta
+ 
+* Request: primer linea es la *request line*, tiene 3 campos: metodo (GET, POST, HEAD, PUT, DELETE), URL y version de HTTP. Las lineas que siguen son *header lines*. La de Host especifica el host donde reside el objeto, en connection va el tipo de conexion, en *user-agent* va el browser y en *accept-language* va el lenguaje que prefiere el usuario (varios headers mas como este)
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160635494-45571e96-5f4a-4a81-9fa3-ad910fec6afd.png)
+
+El campo *entity* va lleno cuando se usa el método POST enviando info. También puede ir en la URL con un método GET. El HEAD se utiliza para debugging. PUT es para subir objetos a servidores web
+ 
+* Respuesta: tiene una *status line* (3 campos: version del protocolo, codigo de status y el mensaje de status), seis *header lines* y un *entity body* (contiene lo que se pidió en el request). Las *header lines*: *date* tiene hora y dia en que el servidor envia data, *Server* indica que servidor generó el mensaje, *Last modified* indica el momento de creacion o última modificacion del objeto, *Content-Lenght* indica el largo del *body* y *Content-type* el tipo del body (HTML por ej). El status code puede ser varios: 200 es OK, 301 es que el objecto fue removido, 400 es bad request, 404 no encontrado, etc. Visitar https://http.cat/.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160636893-f80a5076-f769-44e2-9875-012d6659b7b6.png)
+ 
+ ### Interacción Usuario-Servidor
+ 
+##### Cookies
+ 
+HTTP es *sateless* pero usa cookies para trackear a los usuarios. Esta tecnologia tiene 4 componentes:
+ 
+* Cookie Header line en respuesta de HTTP (Set-Cookie: <identificador>)
+* Cookie Header line en request de HTTP (Cookie: <identificador>)
+* archivo cookie guardado en el *end system* y manejado por el browser
+* base de datos en la pagina de internet.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160638156-1558a839-3a47-47ca-92df-29930aaef2c7.png)
+
+ 
+ ##### Web Caching
+ 
+ El cache de la web (*proxy server*) guarda copias de objetos recientemente *requested*. Antes de establecer TCP con servidor, se establece con el *Web Cache* y se ve si tiene el objeto deseado. si lo tiene, se envia en una respuesta HTTP. Sino, la *Web Cache* establece una conexion TCP con el servidor, envia una request y al recibir una respuesta la envia al usuario, previamente almacenando una copia.
+
+![image](https://user-images.githubusercontent.com/71232328/160639015-5b6e00be-4d9d-43b2-88e4-59e4e807aeec.png)
+ 
+ El *Web cache* hace la conexion más rapida y reduce el trafico hacia el servidor. *Content Distribution Networks (CDNs)*. Una compañia CDN instala caches a lo largo de todo internet.
+Aparece un problema, el objecto en la cache puede estar desactualizado. Aparece el GET condicional, que agrega campo *If-Modified-Since*. El cache envia al server un request con este campo, indicando al servidor que envie un nuevo objecto si la fecha en que fue modificado es distinta a la del request de la cache (304 not modified status code)
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/160639460-651fe762-7f7a-4664-93d1-b25894394221.png)
+
+## Mail en Internet
+ 
+3 componentes:
+* *User agents*: permite a los usuarios leer, responder, enviar, guardar y escribir mensajes (Outlook)
+* *mail servers*: Aqui se envian los mensajes, donde son colocados en una cola de salida. Cuando un usuario quiere leer, el agente lo recupera de este servidor. Aqui estan las *mailbox*.
+* *Simple Mail Transfer Protocol (SMTP)*
+ 
+![image](https://user-images.githubusercontent.com/71232328/160641013-5ab15568-4fc0-4502-be9c-1893ca8a87f6.png)
+
+ Si un servidor no puede enviar un mensaje, lo guarda en una cola de mensajes y lo intenta un tiempo despues.
+ 
+SMTP es el principal protocolo de la capa de aplicaciones para mails. Usa *reliable data transfer* de TCP. Tiene un lado cliente (envia) y otro servidor(mail server). Ambos lados residen en todos los *mail servers*. SMTP restringe a ASCII de  7 bits.
+
+![image](https://user-images.githubusercontent.com/71232328/160644403-b1b54b24-6979-48d4-816b-91c74f01f175.png)
+
+SMTP tiene *handshake* donde se indica las direcciones de email de ambos.
+Comandos del cliente: HELO, MAIL FROM, RCPT TO, DATA, QUIT, CRLF.CRLF (linea vacia). *telnet* sirve para establecer conexion TCP entre localhost y *mail server*.
+ 
+En comparación, HTTP es un *pull protocol*, alguien sube data a la web para que varios *pulleen* del server cuando quieran. Por el contrario, SMTP es mas bién *push protocol*, donde el que envia el mensaje lo *pushea* al *mail server* del receptor. Otra es que SMTP restringe a ASCIIs de 7 bits, HTTP no. HTTP encapsula cada objeto en su mensaje de respuesta, SMTP envia todos en un mensaje.
+
+En el header de SMTP van a aparecer: FROM, TO, SUBJECT. SMTP es un *push protocol*, entonces cómo obtiene el receptor sus mails del servidor? hay varios protocolos para esto: *Post Office Protocol version 3(POP3)*, *Internet Mail Acces Protocol (IMAP)* y HTTP:
+
+* POP3: una vez establecida la conexion TCP tiene 3 fases. En *authorization*, envia contraseña y usuario (user <uuario> pass <contraseña>). En *transaction*, recupera el mensaje y otros comandos (list, retr, dele, quit). En *update*, termina la sesión POP3 y el servidor elimina los mails marcados para este fin. Posibles respuestas del servidor a todos los comandos: OK, ERR. POP3 no guarda información entre sesiones.
+* IMAP: POP3 no permite al usuario crear carpetas remotas y asignarle mensajes. IMAP asocia cada mensaje con una carpeta (INBOX cuando llega el mensaje, luego puede moverse a otra). IMAP mantiene informacion del usaurio entre sesiones. También permite obtener porciones de mensajes (solo el header por ej).
+* HTTP: Hotmail, donde el *user agent* es un web browser. Se usa para enviar y recibir a los servidores un mensaje HTTP.
+ 
+## DNS: Directory Service
+ 
+
+ 
+
+</details>
 
 
 
