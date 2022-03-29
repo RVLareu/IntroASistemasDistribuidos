@@ -1,5 +1,7 @@
 # Introducción A Sistemas Distribuidos - 75.43
 
+### Resumen del Libro
+
 <details>
  <summary>  Capitulo 1 🍾 </summary> 
  
