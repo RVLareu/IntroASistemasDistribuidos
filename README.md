@@ -784,6 +784,42 @@ Los paquetes recibidos fuera de orden se descartan. El que recibe solo debe mant
 
 ### Selective Repeat (SR)
 
+GBN permite llenar el *pipeline* con paquetes. Si el delay del ancho de banda es grande y la ventana también, un error en un paquete podria causar que GBN retransmita mucho paquete innecesariamente. Protocolos **SR** evitan esto, haciendo que el que envía, retransmita solo los paquetes de los que tiene sospecha. Esta retransmision va a qrequerir que el receptor responda individualmente a paquetes. A diferencia de GBN, en la ventana de SR habrá paquetes ya informados como recibidos correctamente por el receptor.
+El receptor va a guarda los paquetes fuera de ordenen un buffer hasta que paquetes perdidos (con un número de secuencia menor) lleguen. Una vez ocurrido esto, enviará el conjunto de paquetes a la capa de arriba.
+
+![image](https://user-images.githubusercontent.com/71232328/161125373-72cf2a12-4d84-46cf-956b-8e97c4b03383.png)
+
+Eventos del SR que envía:
+
+* Recibe data de arriba: chequea el próximo número de secuencia. Si está en la ventana, arma el paquete y envía. Sino igual que GBN
+* Timeout: cada paquete tendrá su propio timer lógico (se puede simular con un timer de hardware)
+* recibe ACK: marca el paquete como recibido. Si el número de secuencia es igual a *send_base*, mueve la ventana. Si al moverse la ventana, caen paquetes que no fueron transmitidos, se transmiten
+
+Eventos del SR que recibe:
+
+* Paquete con nro de secuencia [rcv_base, rcv_base+N-1] es correctamente recibido: el paquete está en la ventana, se envía entonces un ACK. Si no había sido recibido previamente, se lo pone en un buffer. Si el numero de secuencia es igual a la base, el paquete y cualquiera previo en el buffer se envía a la capa superiro, actualizando la ventana
+* Paquete con nro de secuencia [rcv_base-N, rcv_base-1] es correctamente recibido: se genera un ACK, a pesar de que fue recibido previamente
+* Otro rango: se ignora el paquete
+
+![image](https://user-images.githubusercontent.com/71232328/161126483-b0683f71-2657-4545-a158-2d28e40ca315.png)
+
+Las ventanas del que envía y del que recibe no siempre estarán igual. Trae consecuencias. El ancho de la ventana debe ser menor o igual al rango de los número de secuencia.
+
+![image](https://user-images.githubusercontent.com/71232328/161127162-078d3525-59c0-4162-8074-1047c1bc923f.png)
+
+![image](https://user-images.githubusercontent.com/71232328/161127225-f56add79-fec7-4d7e-9846-9a9696d7331d.png)
+
+Cuando el canal que une al que envia y al que recibe es una red, puede ocurrir el reordenamiento de los paquetes.
+
+Términos a reconocer:
+
+* Mechanism:
+* Checksum: detectar errores de bits en paquete.
+* Timer: para retransmitir paquete.
+* Sequence Number: para numeración secuencial de paquetes fluyendo.
+* Acknowledgment: usado por el receptor para informar al que envía que un o varios paquetes fueron recibidos correctamente.
+* Negative Acknowledgment: usando por el receptor para informar al que envía que un paquete no fue recibido correctamente.
+* Window, pipelining: el que envía, solo puede hacerlo con paquetes que su número de secuencia cae en un range (window). Se puede mejorar la performance permitiendo a varios paquetes ser transmitidos pero sin ser *Acknowledged* (pipelining).
 </details>
 
 
