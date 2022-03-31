@@ -636,7 +636,24 @@ Cuando se corre un servidor en un puerto, todos los segmentos que lleguen tendr�
 
 ## Connectionless Transport: UDP
 
+Al elegir UDP, la aplicación prácticamente se está comunicando directamente con IP. UDP toma los mensajes de la aplicacion, les agrega puerto fuente y destino, otros dos campos y lo pasa a la capa de red. En destino, UDP usa el puerto destino para enviarlo al proceso de aplicación. No hay *handshake*, por eso *connectionless*. DNS usa UDP.
 
+Por qué usar UDP y no TCP?
+
+* Más control desde el nivel de aplicación acerca de que data se envía y cuando: esto porque UDP encapsula la data en un segmento y la pasa inmediatamente. TCP tiene control de congestion, reenvia segmento hasta que el receptor confirme que llegó
+* No se establece conexión: no tiene delay en esta etapa, TCP tiene por el *three-way-handshake*. Es por esto que DNS corre en UDP, sino sería más lento. QUIC es un protocolo que usa UDP y le agrega *reliability* en un protocolo de la capa de aplicacion
+* No mantiene un estado de conexion: TCP lo hace, lo que incluye buffers en ambos *end systems* además de parametros de control de congestion y parámetros para confirmar recepcion. UDP no hace nada, destinando menos recursos.
+* El header es chico: en UDP son 8 bytes de overhead, en TCP 20 bytes.
+
+Para tener *realible data transfer* con UDP, hay que construirlo sobre la aplicación.
+
+### estructura del segmendto UDP
+
+El header tiene 4 campos, cada uno de 2 bytes: los puertos, un largo (header + data) y *checksum*, usado por el *host* que recibe para ver si hubo errores en el segmento.
+
+### Cheksum de UDP
+
+Para detección de errores, para ver si los bits se vieron alterados por ruido por ejemplo. Esto lo hace haciendo el complemento  de la suma de los todos los *1* en todas las palabras de 16 bits. Al recibir, el *host* suma todas las palabras al cheksum, si no hubo errores el resultado será todos *1*, si aparece un *0*, hubo errores introducidos en el paquete. Este sistema es un ejemplo del principio **end-end**. OJO! UDP detecta el error, pero no hace nada para recuperar la información corrompida.
 
 </details>
 
