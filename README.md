@@ -660,12 +660,37 @@ Para detección de errores, para ver si los bits se vieron alterados por ruido p
 Esto quiere decir que ningún bit será corrompido o perdido, además serán enviados en el orden correcto. Esto es responsabilidad del protocolo de *reliable data transfer*. Esto es dificil porque la capa por debajo del protocolo puede no ser *realiable*.
 
 <p float="left" align="middle">
-  <img src="https://user-images.githubusercontent.com/71232328/161105952-7214bdff-3947-4e38-beae-4e64a60511a2.png" width="300" />
-  <img src="https://user-images.githubusercontent.com/71232328/161106055-34ea2161-95cd-4ea7-88ce-47345d0ddef8.png" width="300" /> 
-
+  <img src="https://user-images.githubusercontent.com/71232328/161105952-7214bdff-3947-4e38-beae-4e64a60511a2.png" width="400" />
+  <img src="https://user-images.githubusercontent.com/71232328/161106055-34ea2161-95cd-4ea7-88ce-47345d0ddef8.png" width="400" /> 
 </p>
+</br>
 
+Asumimos que los paquetes llegarán en el orden enviado, pero podrán perderse. Consideramos la transferencia en un solo sentido (**unidireccional**). 
 
+### Construyendo un protocolo de transferencia de datos confiable
+
+#### Reliable Data Transfer sobre un canal confiable
+
+**FSM = Finite State Machine**
+
+Se acepta data desde la capa de arriba (*rdt_send(data)*), se crea un paquete y se envia al canal (*udt_send(packet)*).
+
+Del lado que recibe, *rdt* recibe un paquete del canal de abajo via *rdt_rcv(packet)*, saca la data del paquete y pasa la data a la capa de arriba.
+
+![image](https://user-images.githubusercontent.com/71232328/161107383-3cde56f4-3897-451e-a530-df5566c950e2.png)
+
+No hay diferencia entre una unidad de datos y un paquete. Como el canal es confiable, el receptor no debe dar ningún feedback al que envía. Además puede recibir data a la velocidad que envia la fuente.
+
+#### Reliable Data Transfer sobre un canal con errores de bits
+
+bits en un paquete pueden ser corrompidos. El que recibe usa un protocolo de mensajes: **positive acknowledgments (OK)** y **negative acknowledgments (Please repeat that)**. Estos protocolos se conocen como **ARQ (Automatic Repeat reQuest)**. Para manejar errores en bits, se precisan 3 capacidades más:
+* Deteccion de errores: cheksum por ejemplo.
+* Feedback del receptor: positive (ACK) y negative (NAK)
+* Retransmisión: el que envía puede retransmitir paquete que llegó con error.
+
+![image](https://user-images.githubusercontent.com/71232328/161108572-6cdd9a97-adf9-47cc-9449-f75b8e2e3967.png)
+
+Se explica bastante sola la imagen. El que envia espera el **acknowledgment** y en base a eso reenvia o espera otro paquete para enviar de la capa superior. El que recibe si está corrupto envia un NAK, si esta todo OK, extrae la data y envía un ACK. qué pasa si el paquete ACK o NAK es corrupto!? Hay que agregarle cheksums. El que envia no tiene manera de saber si los recibió bien o mal.
 
 
 </details>
