@@ -569,18 +569,14 @@ while True:
 
 ```
 
-
-
-
-
-
-
-
-
-
  
 </details>
 
+<details>
+ 
+ <summary> Capitulo 3 🍾 </summary> </br>
+ 
+</details>
 
 
 
