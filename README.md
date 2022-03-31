@@ -602,6 +602,41 @@ UDP y TCP extienden el servicio de comunicacion del IP entre dos *end systems* a
 
 ## Multiplexing y demultiplexing
 
+Esto es extender el servicio de entrega *host-to-host* provisto por la capa de red a *process-to-process*.
+
+En el destino, la capa de transporte recibe segmentos de la capa de red. Luego se encarga de enviarselos al proceso de aplicación correcto en el *host*. Un proceso puede tener uno o m+as **sockets**. La capa de transporte lleva la data al *socket*. La capa de transporte examina unos campos en el segmento para determinar el socket que los debe recibir y los direcciona, esto es llamado **demultiplexing**. El trabajo de tomar información de los sockets en el *host*, encapsularlos con *headers* y pasar los segmentos a la capa de red es **multiplexing**.
+
+![image](https://user-images.githubusercontent.com/71232328/161094339-ef766436-0a18-43b1-8fcd-05fd9bf3b6e6.png)
+
+Para el **multiplexing** se requiere:
+* Sockets tengan id
+* Segmentos tengan campos que permitan identificar sockets: **puerto de origen**, **puerto de destino** de 16 bits cada uno. Los puerto de 0 a 1023 son llamados **well-known** y están restringidos para uso de HTTP (puerto 80) y FTP (puerto 21).
+
+![image](https://user-images.githubusercontent.com/71232328/161095780-f0c3458a-16b4-4443-bd7d-d3796d16d062.png)
+
+Con estos datos, queda claro como funciona el **demultiplexing** también, lee campo de puerto de destino y envia el segmento al socket destino.
+
+
+
+### Connectionless Multiplexing and Demultiplexing (UDP)
+
+Al crear un socket, la capa de transporte le asigna un numero de puerto. Con *bind*, se puede asociar un puerto especifico al socket. Del lado del servidor se define este puerto, del lado del cliente en general se deja que lo asigne la capa  de transporte. Se incluye tanto el destino como origen para permitir la comunicacion tanto cliente-a-servidor como servidor-a-cliente. Socket UDP queda definido por una tupla conteniendo IP de destino y puerto de destino. Dos segmentos con distinta fuente pero igual destino, van al mismo socket.
+
+![image](https://user-images.githubusercontent.com/71232328/161099040-9baf2991-398e-49f5-a265-b9495e70d233.png)
+
+### Connection-Oriented Multiplexing and Demultiplexing (TCP)
+
+Un socket TCP queda definido por una cuatro-tupla: IP fuente, puerto fuente, IP destino, puerto destino. Dos segmentos con distinta fuente o puerto irán a sockets distintos. EL servidor debe poder soportar múltiples conexiones TCP en simultáneo. Se usan los 4 campos para el **demultiplex**
+
+![image](https://user-images.githubusercontent.com/71232328/161098966-de01e1ae-2fba-4ddf-a563-0aa0c34dd255.png)
+
+### Servidores Web y TCP
+
+Cuando se corre un servidor en un puerto, todos los segmentos que lleguen tendrán el mismo puerto de destino. Los diferencia por la dirección IP. Actualmente los servidores tienen un proceso que lanza hilos por cada conexion.
+
+## Connectionless Transport: UDP
+
+
 
 </details>
 
