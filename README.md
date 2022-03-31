@@ -655,6 +655,19 @@ El header tiene 4 campos, cada uno de 2 bytes: los puertos, un largo (header + d
 
 Para detección de errores, para ver si los bits se vieron alterados por ruido por ejemplo. Esto lo hace haciendo el complemento  de la suma de los todos los *1* en todas las palabras de 16 bits. Al recibir, el *host* suma todas las palabras al cheksum, si no hubo errores el resultado será todos *1*, si aparece un *0*, hubo errores introducidos en el paquete. Este sistema es un ejemplo del principio **end-end**. OJO! UDP detecta el error, pero no hace nada para recuperar la información corrompida.
 
+## Principios de *Realible Data Transfer*
+
+Esto quiere decir que ningún bit será corrompido o perdido, además serán enviados en el orden correcto. Esto es responsabilidad del protocolo de *reliable data transfer*. Esto es dificil porque la capa por debajo del protocolo puede no ser *realiable*.
+
+<p float="left" align="middle">
+  <img src="https://user-images.githubusercontent.com/71232328/161105952-7214bdff-3947-4e38-beae-4e64a60511a2.png" width="100" />
+  <img src="https://user-images.githubusercontent.com/71232328/161106055-34ea2161-95cd-4ea7-88ce-47345d0ddef8.png" width="100" /> 
+
+</p>
+
+
+
+
 </details>
 
 
