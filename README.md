@@ -576,6 +576,33 @@ while True:
  
  <summary> Capitulo 3 🍾 </summary> </br>
  
+Capa de transporte reside entre la de aplicación y la de red. Se encarga de proveer servicios de comunicacion a los procesos de aplicación corriendo en diferentes *hosts*.
+
+En su relacion con la capa de red, se encarga de la comunicacion entre dos procesos de la capa de aplicacion corriendo en dos *end systems* distintos.
+
+### Introducción y servicios de la capa de transporte
+
+La capa de transporte provee **comunicacion lógica** entre dos procesos corriendo en dos *hosts*. Lógica porque hace parecer que los procesos estuvieran directamente conectados. Los procesos usan esta comunicacion lógica para enviarse mensajes abstrayendose de la infraestructura física. Los protocolos de la capa de transporte no se implementan en routers, sí en los *end systems*. Previo a mandar el mensaje, lo convierte en **segmentos**. Le pasa el segmento a la capa de red, donde se lo encapsula en un **datagram** y se lo envia. Los routers actúan sobre el datagram (capa de red). Al llegar, la capa de red extrae el datagram y le pasa el segmento a la capa de transporte que lo procesa y pone a disposicion de la aplicacion.
+
+![image](https://user-images.githubusercontent.com/71232328/161090147-dbfe765a-6197-4dce-b937-8b731d91f789.png)
+
+#### Relacion capa de transporte y de red 
+
+Los protocolos de transporte mueven mensajes de la capa de aplicacion a la de red, dentro del *end system*, pero desconocen como se moverá dentro de la red.
+Un protocolo de transporte podría ofrecer *reliable data transfer* a una aplicacion, a pesar de que el protocolo de red por debajo no lo haga. De la misma manera podría encriptar el mensaje. No ocurre esto con el ancho de banda, donde el protocolo de transporte se ve atado a lo que ocurra en la capa de red.
+
+#### Capa de transporte en el Internet
+
+Dos protocolos en la capa de transporte: UDP (*User Datagram Protocol*) y TCP (*Transmission Control Protocol*). El primero es *unreliable* y *connectionless*. El segundo lo contrario, *reliable* y *connection-oriented*.
+
+**Paquete de la capa de transporte = segmento** (en el caso de UDP a veces puede ser datagram, ojo que también se usa para la capa de red).
+
+El protocolo de la capa de red de internet es IP (*Internet Protocol*), provee comunicación logica entre *hosts*. El servicio es del *mejor esfuerzo* (no garantiza, entonces *unreliable*). Cada *host* tiene una **dirección IP**.
+UDP y TCP extienden el servicio de comunicacion del IP entre dos *end systems* a dos procesos. Esto se denomina **transport-layer multiplexing** y **demultiplexin**. Además proveen chequeos de integridad/errores en segmentos (estos son los únicos servicios que provee UDP). TCP provee además **reliable data transfer**, **congestion control**.
+
+### Multiplexing y demultiplexing
+
+
 </details>
 
 
