@@ -660,8 +660,8 @@ Para detección de errores, para ver si los bits se vieron alterados por ruido p
 Esto quiere decir que ningún bit será corrompido o perdido, además serán enviados en el orden correcto. Esto es responsabilidad del protocolo de *reliable data transfer*. Esto es dificil porque la capa por debajo del protocolo puede no ser *realiable*.
 
 <p float="left" align="middle">
-  <img src="https://user-images.githubusercontent.com/71232328/161105952-7214bdff-3947-4e38-beae-4e64a60511a2.png" width="100" />
-  <img src="https://user-images.githubusercontent.com/71232328/161106055-34ea2161-95cd-4ea7-88ce-47345d0ddef8.png" width="100" /> 
+  <img src="https://user-images.githubusercontent.com/71232328/161105952-7214bdff-3947-4e38-beae-4e64a60511a2.png" width="300" />
+  <img src="https://user-images.githubusercontent.com/71232328/161106055-34ea2161-95cd-4ea7-88ce-47345d0ddef8.png" width="300" /> 
 
 </p>
 
