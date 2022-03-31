@@ -712,9 +712,6 @@ El **FSM** del que envía:
 Como los números de secuencia de los paquetes cambian entre *0* y *1*, a este protocolo se lo llama **alternatig-bit protocol**. Este protocolo no parece que vaya a tener una buena performance.
 
 
-### Pipelined Reliable Data Transfer Protocols
-
-La performance del protocolo anteriror será mala porque es un protocolo de tipo *stop-and-wait*.
 
 <p float="left" align="middle">
   <img src="https://user-images.githubusercontent.com/71232328/161119978-3cc0b1a3-a14e-4851-8ba1-d805fea529b1.png" width="250" />
@@ -725,16 +722,67 @@ La performance del protocolo anteriror será mala porque es un protocolo de tipo
 
 <p float="left" align="middle">
   <img src="https://user-images.githubusercontent.com/71232328/161120062-eb1f3d83-70de-4f82-a4d7-454189c26106.png" width="250" />
-  <img src="https://user-images.githubusercontent.com/71232328/161120104-4b52986e-9160-4f08-88e1-cda479f9e007.png" width="250" /> 
+  <img src="https://user-images.githubusercontent.com/71232328/161120104-4b52986e-9160-4f08-88e1-cda479f9e007.png" width="300" /> 
 </p>
 
-</br>
+
+
+### Pipelined Reliable Data Transfer Protocols
+
+La performance del protocolo anteriror será mala porque es un protocolo de tipo *stop-and-wait*.
+
 
 <p float="left" align="middle">
   <img src="https://user-images.githubusercontent.com/71232328/161120137-dd9c2d28-f126-462c-9883-48638710bea8.png" width="250" />
   <img src="https://user-images.githubusercontent.com/71232328/161120156-24696756-b896-49f3-a8fb-d176511db438.png" width="250" /> 
 </p>
 
+
+</br>
+
+Para solucionar el problema de performance que acarrea el *stop-and-wait*, el que envía lo hace con multiples paquetes sin esperar **acknowledgments**. Esta tecnología se llama **pipelining**. 
+
+<p float="left" align="middle">
+  <img src="https://user-images.githubusercontent.com/71232328/161120747-ebacdba8-354c-4c72-b6e0-57d911466732.png" width="250" />
+  <img src="https://user-images.githubusercontent.com/71232328/161120769-da36cb3c-cda2-47e5-8396-f2092e865ef6.png" width="250" /> 
+</p>
+
+Este método trae las siguiente consecuencias:
+* se debe incrementar el rango del número de secuencia dado que cada paquete en tránsito debe tener un único número
+* Ambos lados de la comunicación deben tener buffers para más de un paquete. Del lado del que envía, para los que fueron transmitidos pero aguardan respuesta. Buffer para paquetes recibidos correctametne del lado opuesto.
+* Las modificaciones de los items previos van a ser determinadas por las formas en que responda el protocolo a paquetes perdidos, corrompidos, y con delay. Existen dos formas: **Go-Back-N** y **Selective-Repeat**
+
+### Go-Back-N (GBN)
+
+El que envía tiene un máximo de paquetes que puede tener sin respuesta.
+
+Numeros de secuencia :
+
+* [0, base-1]: paquetes que fueron enviados y respondidos
+* [base, nextseqnum-1]: paquetes enviados sin respuesta
+* [nextseqnum, base+N-1]: paquetes que pueden ser enviados inmediatamente si es requerido de la capa superior
+* [base+N, inf]: no ueden ser usador hasta que otros paquetes que por el momento no haya sido respondidos (**unacknowledged**) sean respondidos (**acknowledged**).
+
+![image](https://user-images.githubusercontent.com/71232328/161122569-c8235816-3050-4a62-b23b-bd3a902a0fd8.png)
+
+N: **window size**.
+GBN: **sliding-window protocol**
+El rango depende del largo del campo. Si es *k*, entonces será [0, 2k-1]
+
+![image](https://user-images.githubusercontent.com/71232328/161122963-a3cd3fbc-6e07-49e4-b6b4-9adb6b4bd6cb.png)
+![image](https://user-images.githubusercontent.com/71232328/161122991-e76cd10a-2115-496e-94fa-0529afde4b06.png)
+
+A la FSM se le agregaron variables para *base* y *nextseqnum*. El GBN *sender* debe responder a 3 tipos de eventos:
+
+* Invocación desde arriba (rdt_send): chequea si la ventana está llena. Si no lo está, crea el paquete y actualiza variables. Si está llena, devuelve la data a la capa de arriba, que tendrá que intentar de nuevo
+* Receipt of an ACK: al recibir una respuesta de un paquete con numero de secuencia *n*, se asume que los paquetes con número hasta *n* habrán sido correctamente recibidos (**cumulative acknowledgement**)
+* Timeout event: se usa timer para detectar paquetes perdidos, pero en este caso reenvia todos los paquetes que no hayan sido respondidos.
+
+Los paquetes recibidos fuera de orden se descartan. El que recibe solo debe mantener es el número de secuencia siguiente al actual: *expectedseqnum*. Si no recibe un paquete con ese número, lo descarta. GBN es programación orientada a eventos.
+
+![image](https://user-images.githubusercontent.com/71232328/161124226-4b6d5c58-202c-499f-8551-93593b0e74f0.png)
+
+### Selective Repeat (SR)
 
 </details>
 
