@@ -1,6 +1,4 @@
-Para correr el ejemplo:
-
-</br>
+Para correr el ejemplo **TCP**:
 
 1. `python3 server.py` en una consola
 2. `python3 client.py` en otra consola
