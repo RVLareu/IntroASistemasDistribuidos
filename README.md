@@ -660,8 +660,8 @@ Para detección de errores, para ver si los bits se vieron alterados por ruido p
 Esto quiere decir que ningún bit será corrompido o perdido, además serán enviados en el orden correcto. Esto es responsabilidad del protocolo de *reliable data transfer*. Esto es dificil porque la capa por debajo del protocolo puede no ser *realiable*.
 
 <p float="left" align="middle">
-  <img src="https://user-images.githubusercontent.com/71232328/161105952-7214bdff-3947-4e38-beae-4e64a60511a2.png" width="400" />
-  <img src="https://user-images.githubusercontent.com/71232328/161106055-34ea2161-95cd-4ea7-88ce-47345d0ddef8.png" width="400" /> 
+  <img src="https://user-images.githubusercontent.com/71232328/161105952-7214bdff-3947-4e38-beae-4e64a60511a2.png" width="340" />
+  <img src="https://user-images.githubusercontent.com/71232328/161106055-34ea2161-95cd-4ea7-88ce-47345d0ddef8.png" width="340" /> 
 </p>
 </br>
 
@@ -691,6 +691,49 @@ bits en un paquete pueden ser corrompidos. El que recibe usa un protocolo de men
 ![image](https://user-images.githubusercontent.com/71232328/161108572-6cdd9a97-adf9-47cc-9449-f75b8e2e3967.png)
 
 Se explica bastante sola la imagen. El que envia espera el **acknowledgment** y en base a eso reenvia o espera otro paquete para enviar de la capa superior. El que recibe si está corrupto envia un NAK, si esta todo OK, extrae la data y envía un ACK. qué pasa si el paquete ACK o NAK es corrupto!? Hay que agregarle cheksums. El que envia no tiene manera de saber si los recibió bien o mal.
+Se podrían agregar bits de cheksum para recuperar los perdido. Otra es que el que envia, reeenvie el paquete si recibe un NAK o ACK corrupto, pero esto genera **duplicate packets**, donde el que recibe no sabe si el NAK o ACK que envió llegó bien.
+Entonces se agregar un **sequence number** al packet, permitiendo que el receptor pueda determinar si es una retransmision.
+Del lado del que envía, la **FSM** queda así: </br>
+![image](https://user-images.githubusercontent.com/71232328/161118965-e4d3fde6-bdda-4a19-b37c-598097cd8f4d.png)
+</br>
+Del lado del receptor:
+</br>
+![image](https://user-images.githubusercontent.com/71232328/161119114-e87ceaa6-b008-4274-b5b9-294f21023da6.png)
+</br>
+
+#### Reliable Data Transfer sobre un canal con errores de bits y pérdida de paquetes
+
+Con lo visto hasta ahora, es posbile recuperar el paquete perdido, pero cómo se detecta? El que envía no recibe respuesta. Puede esperar un determinado tiempo hasta retransmitir, pero cuánto? mínimo RTT más el tiempo de procesamiento. Debe elegirse un tiempo cuidadosemente, aunque no garantice que se haya perdido el paquete. Puede ser que se tarde mucho en responder y termine en **duplicate data packets**. Desde el lado del que envia, solo tiene que retransmitir basado en un **countdown timer**. Lo debe iniciar cada vez que envía un paquete, saber responder a una interrupcion del timer y poder frenar el timer.
+
+El **FSM** del que envía:
+
+![image](https://user-images.githubusercontent.com/71232328/161119250-2999969c-3690-4fd6-9808-902bbe4cef13.png)
+
+Como los números de secuencia de los paquetes cambian entre *0* y *1*, a este protocolo se lo llama **alternatig-bit protocol**. Este protocolo no parece que vaya a tener una buena performance.
+
+
+### Pipelined Reliable Data Transfer Protocols
+
+La performance del protocolo anteriror será mala porque es un protocolo de tipo *stop-and-wait*.
+
+<p float="left" align="middle">
+  <img src="https://user-images.githubusercontent.com/71232328/161119978-3cc0b1a3-a14e-4851-8ba1-d805fea529b1.png" width="250" />
+  <img src="https://user-images.githubusercontent.com/71232328/161120034-8b41992b-3ec2-4aa4-b8d3-3c08f05fb48b.png" width="250" /> 
+</p>
+
+</br>
+
+<p float="left" align="middle">
+  <img src="https://user-images.githubusercontent.com/71232328/161120062-eb1f3d83-70de-4f82-a4d7-454189c26106.png" width="250" />
+  <img src="https://user-images.githubusercontent.com/71232328/161120104-4b52986e-9160-4f08-88e1-cda479f9e007.png" width="250" /> 
+</p>
+
+</br>
+
+<p float="left" align="middle">
+  <img src="https://user-images.githubusercontent.com/71232328/161120137-dd9c2d28-f126-462c-9883-48638710bea8.png" width="250" />
+  <img src="https://user-images.githubusercontent.com/71232328/161120156-24696756-b896-49f3-a8fb-d176511db438.png" width="250" /> 
+</p>
 
 
 </details>
