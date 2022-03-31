@@ -743,8 +743,8 @@ La performance del protocolo anteriror será mala porque es un protocolo de tipo
 Para solucionar el problema de performance que acarrea el *stop-and-wait*, el que envía lo hace con multiples paquetes sin esperar **acknowledgments**. Esta tecnología se llama **pipelining**. 
 
 <p float="left" align="middle">
-  <img src="https://user-images.githubusercontent.com/71232328/161120747-ebacdba8-354c-4c72-b6e0-57d911466732.png" width="250" />
-  <img src="https://user-images.githubusercontent.com/71232328/161120769-da36cb3c-cda2-47e5-8396-f2092e865ef6.png" width="250" /> 
+  <img src="https://user-images.githubusercontent.com/71232328/161120747-ebacdba8-354c-4c72-b6e0-57d911466732.png" width="350" />
+  <img src="https://user-images.githubusercontent.com/71232328/161120769-da36cb3c-cda2-47e5-8396-f2092e865ef6.png" width="350" /> 
 </p>
 
 Este método trae las siguiente consecuencias:
