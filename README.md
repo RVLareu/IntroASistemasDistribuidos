@@ -820,6 +820,66 @@ Términos a reconocer:
 * Acknowledgment: usado por el receptor para informar al que envía que un o varios paquetes fueron recibidos correctamente.
 * Negative Acknowledgment: usando por el receptor para informar al que envía que un paquete no fue recibido correctamente.
 * Window, pipelining: el que envía, solo puede hacerlo con paquetes que su número de secuencia cae en un range (window). Se puede mejorar la performance permitiendo a varios paquetes ser transmitidos pero sin ser *Acknowledged* (pipelining).
+
+## Transporte orientado a Conección: TCP
+
+### Coneccion TCP
+
+Es **connection-oriented** porque antes de que una aplicación empieze a enviar data a otra, los dos procesos hacen un **handshake**, iniciando varias variables de estado de TCP. La conexión es lógica, el protocolo TCP solo corre en los end-systems. Una conexión TCP provee **full-duplex service**: en una conexion entre A y B, la data de la capa de aplicación puede fluir del proceso A al B al mismo tiempo que del B al A. La conexión también es **point-to-point**: entre un solo receptor y un solo enviador. No es posible el multicasting en TCP (uno envia a muchos).
+
+Para iniciar la conexion, el proceso de aplicacion del cliente informa a la capa de transporte del cliente que quiere iniciar una conexion, indicando el puerto y nombre del server. El cliente envia un segmento TCP, el servidor responde con otro. Finalmente el cliente envia un tercero. Los dos primeros no tienen data  de la capa de aplicación, el tercero puede tener. Por esto se llama **three-way handshake**.
+Del lado del cliente, al recibir la data el TCP, la direcciona al **send buffer**, creado durante el handshake. TCP agarra pedazos de ahi y los va pasando a la capa de red para que sean enviados. El maximo tamaño esta definido por el **maximum segment size (MSS)**, determinado por el largo del frame mas largo de la capa de linkeo que puede enviar el local host (**maximum transmission unit (MTU)**. TCP/IP header es 40 bytes aprox. Ethernet tiene un MTU de 1500 bytes, generalmente MSS es 1460 bytes. TCP le agrega un header a la data, formando un **TCP segment**. Al recibir un segmento, TCP los coloca en el buffer de recepcion.
+
+![image](https://user-images.githubusercontent.com/71232328/161608736-ed4825bf-d5d3-4c2e-8b5a-af58ff5c7208.png)
+
+### Estructura de segmento TCP
+
+Tiene un header y un campo de datos. Este último tiene pedazos de datos de aplicación. MSS determina el maximo largo de este campo.
+El header tiene número de puerto destino y origen, también tiene un cheksum. El header además tiene:
+* campo de número de secuencia de 32 bits y campo de número de acknowledgment de 32 bits
+* **receive window** de 16 bits para control de flujo.
+* el campo del largo del header de 4 bits
+* campo de opciones: para negociar MSS o escalar ventana entre end-systems.
+* campo de flag de 6 bits. ACK bit indica que el campo de acknowledgment es válido (el segmento tiene un acknowledgment para un segmento que fue recibido correctamente). RST, SY y FIN para el setup y cierre de la coneccion. CWR y ECE para notificaciones de congestion. PSH indicaría que la data debe ser enviada a la capa de arriba inmediatamente. URG indicaría que la capa de aplicación marcó como urgente. La ubicación del ultimo byte la determina el **urgent data pointer field**.
+
+![image](https://user-images.githubusercontent.com/71232328/161610084-5b9c5418-95c2-43ee-86db-ebea10a7d060.png)
+
+#### Los numeros de secuencia y acknowledgment
+Vitales en el servicio de TCP de *reliable data transfer*.
+
+![image](https://user-images.githubusercontent.com/71232328/161611283-6c0619c1-0174-4502-b019-4bf4ec6b953e.png)
+
+TCP ve a los datos como un strem de bytes ordenados. El número de secuencia de un segmento hace referencia al número de byte dentro del stream. En el caso de la imagen, los números de secuencia serían: 0, 1000, 2000, ..., 49900.
+Ahora vemos los números de acknowledgement. Una conexion entre A y B, cada segmento que llega de B a A tiene un número de secuencia. El número de acknowledgement que pone A en el segmento es el número de secuencia del proximo byte que espera A de B. A recibe bytes numerados de 0 a 535 de B, en el segmento que A le envíe a B, en el campo de acknowledgement va a poner 536.
+Si B envia de 900 a 1000, pero A todavia espera el 536, no va a responder el acknowledgement de ninguno hasta recibir el 536. Esto es **cumulative acknowledgement**. Si se reciben fuera de orden pueden descartarse o acumularse en un buffer hasta recibir los intermedios. Ambos lados del TCP definen un TCP inicial aleatoriamente.
+#### Telnet
+
+protocolo de la capa de aplicación usado para login remoto. Corre sobre TCP.
+
+![image](https://user-images.githubusercontent.com/71232328/161613807-c46192e3-3f10-4453-b74a-75758df26680.png)
+
+### Estimación del RTT y Timeout
+
+TCP usa un mecanismo de timeout/retransmision para recuperar segmentos perdidos.
+
+#### Estimar RTT
+
+TCP toma una medida por vez. De esta manera, el RTT de muestra es tomada una vez cada RTT. Nunca se computa un RTT de muestra para un segmento retransmitido. TCP a su vez mantiene un promedio de RTT.
+
+`RTT estimado = 0.875 * RTT estimado + 0.125 *RTT de muestra`
+Este promedio es llamado **exponential wighted moving average (EWMA)**, dandole más peso a las muestras recientes.
+También se guarda el desvio del RTT
+`dev RTT= 0.75 * dev RTT + 0.25 * |RTT de muestra - RTT estimado|`
+
+De esta manera el timeout para TCP será:
+
+`Intervalo de timeout = RTT estimado + 4 * dev RTT`
+
+Iniciando con un timeout de 1 segundo. Cuando ocurre un timeout, el valor se duplica para evitar otro subsecuente. Cuando un segmento es recibido nuevamente y actualizado el RTT estimado, el timeout es calculado nuevamente.
+
+### Reliable Data transfer
+
+
 </details>
 
 
