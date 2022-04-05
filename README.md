@@ -879,6 +879,87 @@ Iniciando con un timeout de 1 segundo. Cuando ocurre un timeout, el valor se dup
 
 ### Reliable Data transfer
 
+El servicio de IP es unreliable. Los segmentos de la capa de transporte pueden sufrir esto. TCP crea un servicio confiable sobre IP. TCP usa un solo timer de retransmision. El timer se inicia al pasar el segmento a IP.
+TCP responde a tres eventos principales:
+* Recibe data de la aplicación de arriba: crea segmento TCP con el número de secuencia igual a nextseqnum (actualiza sumando los bytes), si el timer no está corriendo lo inicia, pasa el segmento a IP.
+* timeout: retransmite el segmento que no haya sido acknowledged con el seqNum más chico
+* recibe ACK: si es mayor a sendBase, sendBase = valor de ACK. Si hay segmentos no acknowledeged, inicia el timer.
+
+Cada vez que TCP retransmite por un timeout, resetea el timer al doble del valor que tenia, asi sucesivamente hasta que recibe data de arriba o recibe un ACK y el timeInterval se calcula nuevamente. Este mecanismo sirve para control de congestion, retransmitiendo entre intervalos más largos de tiempo.
+
+El que envía puede detectar la pérdidad de un paquete debido a **ACK duplicados**: el que envia recibe un ACK de un segmento del cual ya habia recibido. 
+Cuando el que recibe lo hace con un número de secuencia mayor al esperado, reenvía un ACK en referencia último byte en orden recibido correctamente (duplica ACK). Si se reciben 3 ACK duplicados, el que envía hace una **fast retransmit**, retransmitiendo el segmento perdido antes de que el timer finalice.
+
+![image](https://user-images.githubusercontent.com/71232328/161748672-33aed8c3-7afe-478a-9adb-7f471b98cc4c.png)
+
+#### GBN o SR?
+Los acknowledgements de TCP son acumulativos los segmentos recibidos correctamente pero fuera de orden no son individualmente ACKed. TCP solo debe mantener el número de secuencia más chico del byte transmitido pero no acknowledged y el número de secuencia del siguiente byte a enviar. Parece un GBN con algunas diferencias. Muchos TCP guardan en un buffer los segmentos recibidos fuera de orden. A diferencia de GBN que retransmitiría todos los paquetes desde el perdido en adelante, TCP a lo sumo enviará uno. **Selective acknowledgement** permite al TCP que recibe hacer acknowledge de segmentos fuera de orden selectivamente en vez de acumulativo. El mecanismo de recuperación de errores es un híbrido entre GBN y SR.
+
+### Control de flujo
+
+Los hosts de TCP colocan la data recibida en buffer del cual lee el proceso de aplicación. Si no lee rápido, puede haber un overflow. TCP provee un servicio de control de flujo para evitar esto. El duplicado del timer tenía que ver con un mecanismo de control de congestion. El control de flujo se hace haciendo que el que envia mantenga una variable **receive window**: le da una idea de qué tanto espacio le queda al que recibe en el buffer.
+El tamaño del buffer es RCVBuffer. *LastByteRead* es el número del último byte leído por la aplicación del buffer. *LastByteRcvd* es el número del último byte que fue puesto en el buffer. *rwnd* es ventana, entonces `rwnd=RcvBuffer−[LastByteRcvd−LastByteRead]`, es dinámico. Un host le comunica al otro cuánto espacio le queda, colocando el valor de la variable en el campo de la ventana en cada segmento que envia.
+
+![image](https://user-images.githubusercontent.com/71232328/161750983-4c70041d-8807-4297-9523-97c6cff33189.png)
+
+
+Si la ventanta llega a cero, pero el que enviaba no tiene nada que enviar, entonces va a quedar bloqueado. TCP obliga al que envia a enviar constantemente segmentos con un byte de data cuando la ventana tiene valor cero. Estos segmentos son acknowledged por el que recibe y en algún momento se liberará la ventana
+
+### Manejo de conexión
+
+Para iniciar la conexion, el cliente TCP envía un segmento con el bit de SYN en 1 (**SYN segment**) y con un número de secuencia (*client_isn*) aleatorio en el campo. Al recibirlo, el servidor hace lugar para el buffer y las variables, además envía un segmento informando que la conexion fue garantizada. En este segmento, el bit SYN se pone en 1, en el campo de acknowledgement se coloca *client_isn + 1* y en el campo del número de secuencia coloca el del servidor (*server_isn*). Este segmento se conoce como **SYNACK segment**. Al recibirlo el cliente, envia otro segmento en respuesta (un ACK), poniendo en el campo de acknoledgement el valor *server_isn + 1*, seteando el bt SYN a cero
+
+![image](https://user-images.githubusercontent.com/71232328/161753414-294594d0-926a-4edc-a919-f455a376a95e.png)
+
+Al terminar una conexion, se liberan los recursos. El cliente envia un segmento especial al server, con el bit FIN en 1. El server responde con un ACK. Luego el server envia un segmento con FIN en 1. El cliente responde con un ACK y finaliza
+
+![image](https://user-images.githubusercontent.com/71232328/161753724-3ce4f58c-0a56-452b-8505-39342312437b.png)
+
+
+Durante la conexion, el TCP para por diferentes estados. Del lado del cliente:
+
+![image](https://user-images.githubusercontent.com/71232328/161753828-f7b096a4-9541-42a7-a6b5-a8035d30be59.png)
+
+Del lado del servidor:
+
+![image](https://user-images.githubusercontent.com/71232328/161753960-54bb4689-a615-4ca8-8214-d4620b6733a3.png)
+
+Si el servidor recibe un segmento con un número de puerto incorrecto, enviará un segmento especial de reseteo con la flag RST en 1. Entonces, si se envía un segmento SYN pueden pasar tres cosas:
+* se recibe un SYNACK: ok
+* se recibe un RST: no se está corriendo una aplicación en el puerto indicado
+* no recibe nada: SYN fue bloqueado por firewall
+
+## Principios de control de congestion
+
+#### 2 senders, 1 router con buffer ilimitado
+
+![image](https://user-images.githubusercontent.com/71232328/161760395-d0273e80-256b-462c-bda0-fc2ae7b8f8b3.png)
+
+si se envia a una tasa entre 0 y la mitad de la capacidad del link, el throughput del que recbie es igual a la tasa de envia. Si se envia por encima de esa tasa, el throughput es la mitad de la capacidad del link. Este límite es consecuencia de compartir la capacidad del link entre dos conexiones. El problema es que a medida que la tasa de envio se acerca a la mitad de la capacidad del link, el delay crece hasta infinito. 
+*Se observan delays por colas a medida que la tasa de arribo de los paquetes se acerca a la capacidad del link*
+
+#### 2 senders, 1 router con buffer limitado
+
+![image](https://user-images.githubusercontent.com/71232328/161761256-8ed8fe96-6318-4fad-bade-b00133ecf2dc.png)
+
+Los paquetes que lleguen a un buffer lleno vana ser dropeados. Asumimos que en este caso si dropea, se retransmite automaticamente. La tasa a la que la tasa de transporte envia segmentos a la capa de red es llamada **offered load**. El ejemplo, del total de la tasa de envio, 1/3 es para retransmisiones.
+*si hay congestion, el que envia debe realizar retransmisiones para compensar los paquetes perdidos por el overflow del buffer*.
+Podria ocurrir que retransmita un paquete que no se perdió (timeout), en este caso el router usaría capacidad del link para enviar el mismo paquete por duplicado.
+*retransmisiones innecesarias por el que envía debido a grandes delays puede causar que el router use capacidad del link para enviar paquetes innecesariamente*
+
+
+#### 4 senders, routers con buffer limitado y caminos con multiples salts
+
+![image](https://user-images.githubusercontent.com/71232328/161762772-59b7b2fa-21cb-4e88-bef9-a8c15dbdd37c.png)
+
+Si un router que no es el primero dropea, el trabajo de los previos se desperdicia. Hubiese sido mejor que dropee el primero.
+
+*cuando se dropea un paquete en el camino, la capacidad de transmision que fue usada en cada etapa para direccionar ese paquete, es desperdiciada*
+
+### Approaches a control de congestion 
+
+* **ent-to-end congestion control**:
+* **network-assisted congestion control**:
 
 </details>
 
