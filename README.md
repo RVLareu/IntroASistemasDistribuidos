@@ -887,8 +887,8 @@ TCP responde a tres eventos principales:
 
 Cada vez que TCP retransmite por un timeout, resetea el timer al doble del valor que tenia, asi sucesivamente hasta que recibe data de arriba o recibe un ACK y el timeInterval se calcula nuevamente. Este mecanismo sirve para control de congestion, retransmitiendo entre intervalos más largos de tiempo.
 
-El que envía puede detectar la pérdidad de un paquete debido a **ACK duplicados**: el que envia recibe un ACK de un segmento del cual ya habia recibido. 
-Cuando el que recibe lo hace con un número de secuencia mayor al esperado, reenvía un ACK en referencia último byte en orden recibido correctamente (duplica ACK). Si se reciben 3 ACK duplicados, el que envía hace una **fast retransmit**, retransmitiendo el segmento perdido antes de que el timer finalice.
+El que envía puede detectar la pérdidad de un paquete debido a **ACK iguales**: el que envia recibe un ACK de un segmento del cual ya habia recibido. 
+Cuando el que recibe lo hace con un número de secuencia mayor al esperado, reenvía un ACK en referencia último byte en orden recibido correctamente (duplica ACK). Si se reciben 3 ACK iguales, el que envía hace una **fast retransmit**, retransmitiendo el segmento perdido antes de que el timer finalice.
 
 ![image](https://user-images.githubusercontent.com/71232328/161748672-33aed8c3-7afe-478a-9adb-7f471b98cc4c.png)
 
@@ -958,8 +958,76 @@ Si un router que no es el primero dropea, el trabajo de los previos se desperdic
 
 ### Approaches a control de congestion 
 
-* **ent-to-end congestion control**:
-* **network-assisted congestion control**:
+* **ent-to-end congestion control**: la capa de red no ofrece apoyo explicito a la de transporte para fines de control de congestion. La presencia de congestion puede ser inferida por los end-systems debido a la perdida de paquetes o delay. TCP toma este approach
+* **network-assisted congestion control**: routers proveen feedback al que envia/recibe acerca el estado de congestion de la red.
+
+En el caso de asistida por la red, la informacion llega al que envía de dos maneras: feedback directo, donde un router envia un paquete que indica que hay congestion o feedback indirecto, donde el router puede marcar un campo de un paquete destinado a tal fin. Al llegar al receptor, este informará al que envía de la notificación de congestion. Lleva un RTT
+
+
+![image](https://user-images.githubusercontent.com/71232328/163653550-51c9974a-c41a-45af-b547-76fc0359fc11.png)
+
+## Control de Congestión TCP
+
+TCP usa control de congestion end-to-end. Apunta a limita la tasa de envío en la conexión. Si el que envía percibe que hay poca congestión, aumenta la tasa de envío. Si percibe lo contrario, la reduce. Cada conexion TCP tiene un buffer de recepcion, envío y variables. El control de congestion de TCP hace que el que envía tenga una **congestion window: cwnd**, que impone una restricción a la tasa de envío.
+
+
+`LastByteSent−LastByteAcked≤min{cwnd, rwnd}`
+
+Cuando hay excesiva confestión, uno o más buffers de routers se ven desbordados generando dropeos. Esto resulta ,en el que envía, en un timeout o tres ACKs iguales, lo que es tomado como un indicador de congestion. Se disminuye el tamaño de **cwnd**.
+Si no hubiera congestion, el que envía tomaría los ACKs como indicadores de que puede aumentar la tasa de envío (aumentando el tamaño de la **cwnd**). Como usa ACKs (o timeouts) para determinar el tamaño, se dice que es **self clocking**.
+
+
+Si mucho TCP envían a altas tasas, pueden saturar la red. Si envía atasas bajas, la desaprovechan. Para manejarse correctamente, siguen los siguientes principios:
+
+* Un segmento perdido implica congestion, entonces se debe reducir la tasa de envío
+* Un ACK de un segmento indica que se puede aumentar la tasa de envío
+* La estrategia de TCP es testear el ancho de banda. Esto es incrementar la tasa de envío hasta que ocurra un timeout o tres ACKs iguales (es decir se pierda un paquete).
+
+El **algoritmo de control de congestión de TCP** tiene tres componentes principales:
+
+* **Arranque lento**: cuando empieza una conexion, cwnd se setea a 1 MSS (tasa de envio: MSS/RTT). Por cada ACK, la tasa se incrementa en 1 MSS. Como ocurre por cada paquete, resulta en que se duplica la tasa e envío cada RTT: crece exponencialmente.
+![image](https://user-images.githubusercontent.com/71232328/163654105-80542184-00e2-40ed-893f-fef48a251c9a.png)
+Si se pierde un paquete, **cwnd** se setea en 1 y vuelve a empezar. También setea otra variable **ssthresh** (slow start treshold) a cwnd/2. Cuando cwnd alcanza el valor de sstresh (la mitad del valor de la ventana la ultima vez que hubo congestion) entra en el modo de evitar congestion (incrementos con más cuidado). Tambien puede terminar cuando recibe 3 ACKs iguales, lo que lleva a una retransmision rapida y entrada en rapida recuperacion.
+![image](https://user-images.githubusercontent.com/71232328/163654282-d5f28821-4688-4a06-991d-579df48cd854.png)
+
+
+* **Evitar congestion**: el valor de cwnd es la mitad de su valor la última vez que hubo congestión. Entonces en vez de duplicar cwnd cada RTT, lo aumenta en 1 MSS cada RTT. El comportamiento se mantiene, actualizando ssthresh. Si se reciben tres ACKs iguales, TCP agrega 3 MSS a cwnd para contar los 3 ACKs y actualiza el valor de ssthresh a cuando llegaron los 3 ACKs. Se entra en recuperación rápida
+* **Recuperación rápida**: el valor de cwnd se incrementa en 1 MSS por cada ACK duplicado recibido por el segmento que llevó a TCP a entrar en recuperación rápida. Cuando lelga un ACK por el segmento perdido, se entra en modo evitar congestión. si hay timeout, se pasa a arranque lento.
+
+![image](https://user-images.githubusercontent.com/71232328/163654573-13a7bcb2-b11c-41b0-93e8-9cd920f260ba.png)
+
+Queda claro viendo TCP Tahoe. El control de congestion de TCP es llamado **additive-increase, multiplicative-decrease (AIMD)**. *additive* porque se aumenta cwnd linealmente, y *multiplicative-decrease* cada vez que recibe tres ACKs iguales.
+
+`average throughput of a connection = 1,22 * MSS * RTT * L` L: loss rate.
+
+### Fairness
+
+Si se tienen *K* conexiones TCP y todas pasan por un link con capacidad de conexión R. Se dice que un mecanismo de control de congestión es justo si la tasa de transmision promedio de cada conexión es R/K
+
+![image](https://user-images.githubusercontent.com/71232328/163654761-b0f767b3-26a2-45a4-bb62-5e3d191f2506.png)
+
+Si se tiene en cuenta la forma en que se maneja el mecanismo de control de congestión, donde se testea el ancho de banda hasta que se pierden paquetes, se puede esperar que el throughput oscile cercano a R/K. En el caso de 2 end-systems, sería como lo siguiente:
+
+![image](https://user-images.githubusercontent.com/71232328/163654846-11fffb95-78b2-40ec-a10f-0683018aae14.png)
+
+### Fairness y UDP
+
+Desde el punto de vista de TCP, las conexiones UDP no están siendo justas
+
+### Fairness y conexiones TCP paralelas
+
+Si pudiera hacerse que UDP fuera justo, igualmente habría un problema: las conexiones en paralelo. Si hay 9 aplicaciones cliente-servidor cada una con una conexion TCP y llega una nueva, cada una recibe R/10. Pero si la nueva usa 11 conexiones TCP, se estaría llevando aprox R/2.
+
+### Control de congestión asistido por la Red
+
+**Explicit Congestion Notification (ECN)**: en la capa de red, 2 bits en el campo del Tipo de Servicio del header del datagram de IP se usan para ECN. Unseteo es usado por el routes para indicar congestion. Esto llega al host de destino, que le informa al que envía, seteando el bit ECE en el segmento ACK. El que envía, reacciona modificando la cwnd. Otro seteo posible es usado por el que envía para indicar a los routers que tanto el que envía como el que recibe pueden responder a seteos en ECN.
+
+![image](https://user-images.githubusercontent.com/71232328/163655061-084bd94f-0184-4da8-abc3-9ee19e6b81c6.png)
+
+
+
+
+
 
 </details>
 
