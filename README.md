@@ -1156,15 +1156,138 @@ Esta implementacion es el corazón del **software-defined networking (SDN)**. El
  #### RoundRobin y Weighted Fair Queuing (WFQ)
  
 RR alterna el servicio entre las clases: por ejemplo clase 1,2,1,2,etc. **work-conserving queuing**, si no hay paquetes en una cola, inmediatamente pasa a la siguiente y así sucesivamente. WFQ es una generalización de RR. Se va a atender cada clase de manera circular.
- ![image](https://user-images.githubusercontent.com/71232328/163683181-89bc666e-6d4c-47aa-b8ce-56ba1725947d.png)
+  ![image](https://user-images.githubusercontent.com/71232328/163683116-894b4bed-a4db-4201-8798-a1be8575d658.png)
+ 
  A diferencia de RR, en un intervalo de tiempo cada clase recibirá un diferencial de tiempo de atención justo
+ 
+ 
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163683181-89bc666e-6d4c-47aa-b8ce-56ba1725947d.png)
+ 
  
  ## Protocolo de Internet (IP): IPv4, IPv6
 
+ ### IPv4
  
- ![image](https://user-images.githubusercontent.com/71232328/163683116-894b4bed-a4db-4201-8798-a1be8575d658.png)
+ el paquete de la capa de red es el *datagram*. Campos clave:
+ 
+ * **número de version**: 4 bits que especifican la versión del protocolo IP
+ * **largo del header**: 4 bits. Generalmente 4 bytes de header
+ * **Tipo de servicio**: para distinguir distintos tipos de datagrams (real-time por una aplicación de telefonía o non-real-time como FTP). 2 de estos bits son usados para ECN
+ * **Largo del datagram**: largo total del datagram (incluido el header). 16 bits de largo el campo. En general son de 1500 bytes
+ * **Identificador, flags y offset de fragmentación**: 
+ * **Time-to-live**: Para evitar que los datagrams circulen para siempre en loop. Si llega a cero, se dropea
+ * **Protocolo**: Se usa cuando el datagram llega al destino. Especifica a que protocolo de la capa de transporte debe ser transferido (TCP si es 6, UDP si es 17)
+ * **Cheksum del header**: detectar errores en el datagram. Se toman números de 2 bytes y se suman, se hace el complemento a 1. Si el checksum no coincide con el calculado => error y se dropea.
+ * **dirección IP origen y destino**: 
+ * **Opciones**: permite extender el header IP
+ * **Data (payload)**: contiene el segmento de la capa de transporte (TCP o UDP)
+ 
+  ![image](https://user-images.githubusercontent.com/71232328/163683181-89bc666e-6d4c-47aa-b8ce-56ba1725947d.png)
+ 
+ ### Fragmentacion del *datagram* de IPv4
 
+El máximo tamaño de paquetes de la capa de red que pueden transportar los protocolos de la capa de linkeo son llamados **maximum transmission unit (MTU)**. Cada IP datagram va encapsulado en un marco de la capa de linkeo, entonces el MTU de la capa de linkeo pone un límite al largo del datagram de IP. El problema es si cada link en un camino tiene distintos MTU. Si se tiene que transmitir un datagram a un link de salida con un MTU más chico que el largo del datagram, entonces se debe **fragmentar**. Encapsulando cada parte en datagrams de IP más chicos. Antes de pasar a la capa de transporte deben ser rearmados. Este trabajo se da en los end-systems, no en los routers. Para que pueda realizar esta tarea, se colocan *identification,flag y framentation offset* en el datagram. Los fragmentos tienen el mismo identificador. El offset para determinar donde va el fragmento.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163692899-c2717271-779a-4dd1-8203-366ec04da54d.png)
 
+ 
+### addressing de IPv4
+ 
+ El límite entre el host y el link físico es llamado **interfaz**. De igual manera se llama entre el router y los enlaces de entrada y salida. Las direcciones IP tecnicamente están asociadas con una interfaz. Cada dirección tiene 32 bits, escritas en **dotted-decimal notation** (i.e.:  193.32.216.9)
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163693009-c4087e75-d6e4-4053-9204-360f0c8f50d5.png)
+
+ La red interconectando las interfaces de 3 hosts y la interfaz del router forma una **subnet**. En este caso, la dirección de la subnet es 223.1.1.0/24. el **/24** es llamado **subnet mask**, indica que los 24 bits definen la dirección de la subnet.
+ El **network prefix**, hace referencia a la parte de la dirección que tienen en común los host y determina la subnet.
+
+ Puede haber subnets tanto entre hosts como entre routers.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163693252-ac53214b-ff82-4d4f-840d-c22d6c730205.png)
+ 
+ Si se tiene una dirección del estilo a.b.c.d/x, los primeros x bits deben ser considerados para la forwarding table, los restantes 32-x bits sirven para determinar al dispositivo dentro de la subnet. Previamente, las partes de red de una dirección IP estaban restringidas a 8, 16 o 24 bits de largo, este esquema era llamado **classful addressing**, ya que estas subnets eran llamadas de tipo A, B o C.
+ 
+ Existen otro tipo de direcciones IP, las de broadcast: 255.255.255.255. En este caso, el mensaje es enviado a todos los hosts dentro de la subnet.
+ 
+ ### Como una organización obtiene un bloque de direcciones
+ 
+ Para obtener este bloque y usarlo en la subnet, debe contactarse a ISP. Este proveerá de un bloque aún más grande, del cual dará una parte a la organización que hizo el pedido
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163693401-7d70a053-bcc7-4139-9c24-0d332a3b344a.png)
+
+ A las ISP les de las direcciones la **ICANN**.
+ 
+ ### obteniendo direcciones para host: Dynamic Host configuration Protocol
+ 
+ Una vez obtenido el bloque, se queiren asignar direcciones IP individuales a las interfaces de hosts y routers. Las direcciones de host son configuradas usando **DHCP**. Permite a un host obtener una dirección automáticamente. Al host se le asigna un **dirección IP temporaria** distinta cada vez que se conecta. DHCP tambíen es conocido como **zeroconf** o **plug and play**. DHCP es un protocolo cliente-servidor, donde el clietne es el host recién llegado queriendo obtener información de configuracion de la red (IP para él). Cada subnet tendrá su DHCP server. Si no tiene, un router (DHCP relay agent) sabrá la dirección de un server DHCP.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163693482-8eef05e5-f3d2-4a97-bf00-de4a6958aa85.png)
+
+ 
+ Para un host recién llegado, el protocolo DHCP tiene 4 pasos:
+ 
+ * **Descubriemiento del server DHCP**: debe encontrar al server, se hace usando **DHCP discover message**, que se envía sobre UDP al puerto 67. Como no sabe a quien enviarlo, le pone la direccion de broadcast (255.255.255.255) y una dirección origen de 0.0.0.0
+ * **DHCP server offer**: Cuando recibe el *discover message*, responde al cliente con un **DHCP offer message** que se envía a la dirección de broadcast. Como puede haber varios servers, el cliente puede elegir. El mensaje incluye **address lease time**, que es el tiempo que la dirección será valida
+ * **DHCP request**: el cliente elige el server y le responde con un **DHCP request message**, devolviendo los parametros de configuración que le llegaron.
+ * ** DHCP ACK**: el servidor responde con un **DHCP ACK message** confirmando los parámetros
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163693575-486e6d80-bc0c-49dd-8ee2-ff833711e16b.png)
+
+ 
+ DHCP también provee un mecanismo por el cual el cliente puede renovar la dirección IP asignada.
+ 
+ ### Network Address TRanslation (NAT)
+ 
+ Qué pasa si no se puede otorgar un bloque de direcciones seguidas ? Para solucionar esto surge **NAT**. Un router puede tener NAT activado. En una casa, las interfaces tendrán la misma dirección de subnet. En la IP se puede reservar partes para **private network** y **realm with private addresess**. Esta última hace referencia a direcciones que solo tienen sentido para dispositivos dentro de la red. Hay muchas redes de casa, muchas usando la misma dirección. No hay problema si se envían paquetes dentro de la red, pero si se envía pro fuera no pueden usar estas direcciones. Para esto aparece NAT.
+ ![image](https://user-images.githubusercontent.com/71232328/163693664-df5aa16c-eede-4f27-8466-c46f4c441185.png)
+
+ El router de NAT es visto como un dispositivo con una dirección IP. Todo el tráfico de salida y entrada pasa por las interfaces correspondientes de este dispositivo. Usa una **NAT translation table** para definir a que host enviar el datagram, ya que los paquetes que llegan tienen como dirección la IP de la interfaz del NAT. Se ayuda también incluyebdo puertos en la entrada de la tabla. Como el puerto es de 16 bits y lo usa NAT, nat puede soportar en simultáneo más de 60000 conexiones simultaneas.
+ Como contra tiene que los puertos deberian ser usados para identificar procesos, no hosts. Esto se puede solucionar con **NAT traversal**. Además NAT viola el principio de que los routers deberían ser de la capa 3 (de red), interfiriendo nodos modificando las direcciones IP y números de puerto. Son llamados **middleboxes**: operan en la capa de red pero tienen funciones diferentes a la de los routers.
+ 
+ 
+ ### IPv6
+ 
+ Surge cuando se empiezan a acabar las direcciones Ipv4
+ 
+ El formato del datagram y los mayores cambios son:
+ 
+ * **Expanded addressing capabilities**: direcciones de 128 bits. Introduce direcciones **anycast**, se puede enviar un datagram a un grupo de hosts
+ * **streamlined 40-byte header**: fijo, más facil de procesar
+ * **labeling de flow**: Audio y video pueden ser tratados como **flow**, también el trafico llevado por un usuario con alta prioridad
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163693872-928c2ffa-a110-4ffe-b4a0-cd71c7a474bb.png)
+
+ 
+ Campos en Ipv6:
+ 
+ * **Version**: 6 bits
+ * **Traffic lcass**: para dar prioridad a datagrams en un flujo, o de una aplicacion}
+ * **flow Label**: identificar flujos de datagramas
+ * **Payload lenght**: cuantos bytes despues del header de 40 bytes
+ * **Hop limit**: disminuye en 1 cada vez que un router lo forwardea, cuando llega a cero se descarta el datagram.
+ * **Direcciones de origen y destino**:
+ * **Data**: al llegar a destino, se remueve y se pasa al protocolo especificado por el header
+ 
+ Headers de IPv4 que no están en IPv6:
+ 
+ * **Fragmentation**: esto lo deben realizar los end systems, si un router recibe un datagram muy grande, lo dropea y envía un aviso (ICMP) al sender. El sender reenvia en datagrams más chicos
+ * **Header checksum**:  como ya se hace en la capa de transporte y en la de linkeo, es redudndante
+ * **Options**: resulta en un header fijo de 40 bytes que puede procesarse más rapido
+ 
+ ### transicion de IPv4 a IPv6
+ 
+ Los sistemas IPv4 no son capaces de manejar IPv6 (sí al revés). Surge el **tunneling**. A los routers IPv4 entre routers IPv6 se los llama **tunnel**. El nodo IPv6 coloca el datagram IPv6 entero en el campo de data (payload) de un datagram IPv4 y lo envía. Para los routers IPv4 intermedios no es un paquete distinto al resto, cuando llega al nodo IPv6 destino, este determina que el datagram IPv4 contiene un datagram IPv6 (viendo el campo del número de protocolo del datagram IPv4 es 41). Lo extrae y redirecciona como si fuera un datagram IPv6 a su vecino IPv6
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163694193-e45ba490-f085-4202-b3a7-a381fb8de4ce.png)
+
+ ## Forwaring generalizado y SDN
+ 
+ 
+ 
+ 
+
+ 
+ 
  
 </details>
 
