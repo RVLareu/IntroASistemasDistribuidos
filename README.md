@@ -3,7 +3,7 @@
 ### Resumen del Libro
 
 <details>
- <summary>  Capitulo 1: red de computadoras e Internet 🍾 </summary> 
+ <summary>  <h3>Capitulo 1 red de computadoras e Internet</h3> 🍾 </summary> 
  
  </br>
 
@@ -202,7 +202,7 @@ Malware (?)
 
 <details>
  
-<summary> Capitulo 2: Capa de aplicación 🍾</summary>
+<summary> <h3>Capitulo 2 Capa de aplicación</h3> 🍾</summary>
  
 </br>
  
@@ -574,7 +574,7 @@ while True:
 
 <details>
  
- <summary> Capitulo 3: capa de transporte 🍾 </summary> </br>
+ <summary> <h3>Capitulo 3 capa de transporte</h3> 🍾 </summary> </br>
  
 Capa de transporte reside entre la de aplicación y la de red. Se encarga de proveer servicios de comunicacion a los procesos de aplicación corriendo en diferentes *hosts*.
 
@@ -1033,7 +1033,7 @@ Si pudiera hacerse que UDP fuera justo, igualmente habría un problema: las cone
 
 
 <details>
- <summary> Capítulo 4: capa de red: plano de datos 🍾</summary>
+ <summary> <h3>Capítulo 4 Capa de red: plano de datos </h3>🍾</summary>
  
  Capa de red puede dividirse en dos partes que interactuan: plano de datos y plano de control.
  
@@ -1292,5 +1292,5 @@ El máximo tamaño de paquetes de la capa de red que pueden transportar los prot
 </details>
 
 <details>
- <summary> Capítulo 5: capa de red: plano de control 🍾</summary>
+ <summary> <h3>Capítulo 5 capa de red: plano de control </h3>🍾</summary>
 
