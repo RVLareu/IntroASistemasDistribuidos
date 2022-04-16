@@ -1072,8 +1072,99 @@ Esta implementacion es el corazón del **software-defined networking (SDN)**. El
  
  ## Qué hay dentro de un router?
  
+ En un router se pueden identificar 4 componentes:
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163681318-4d890d45-c77c-4cd0-a860-c9e0ce99070d.png)
+
+ * input ports o **puertos de entrada**: en la capa física, une link con router. Realiza también tareas de la capa de linkeo (cajitas blancas en foto). Tambíen se realiza una función de *lookup*, donde se determina el puerto de salida. Paquetes de control son direccionados del puerto de entrada al procesador de routeo
+ * **Switching fabric**: conecta el puertos de entrada con los de salida
+ * **puertos de salida/output ports**: almacena los paquetes recibidos del **switching fabric** y los transmite al link de salida realizando las funciones de capa de linkeo y capa física
+ * **Procesador de routeo**: realiza tareas del plano de control (protocolos de routeo, mantener tablas, comunicarse con el controlador remoto para actualizar las tablas de forwarding)
+ 
+ Los puertos de enrtada/salida y switching fabric son implemetnados en hardware, esto porque operan en los nanosegundos. Mientras que el plano de datos opera en los milisegundos (software).
+ 
+ ### Procesamiento en puerto de entrada y forwarding basado en destino
+ 
+ En la función de lookup se hace uso de la tabla de forwarding. La tabla es mantenida por el procesador de routeo o es recibida por un controlador SDN remoto. 
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163681734-82eff5f7-2f96-402b-a714-488e69564a6e.png)
  
  
+ En la tabla de forwarding puede alcanzar con matchear un prefijo para redireccionar el paquete al puerto de salida. Si matchea más de uno, se elige el que tiene el matcheo más largo. Todo esto se realiza en hardware. Una vez determinado el puerto de salida, el paquete se envía a la **switching fabric**. Si hay otros en la fabrica, el paquete se encola en el puerto de entrada. Otras acciones que se realizan en esta etapa son: verificar versión del paquete, checksum, tiempo de vida, admemás contadores usados en la red deben ser actualizados.
+ Se dice que es **match plus action**, porque matchea un dirección IP y luego lo envía a la **switching fabric** al puerto de destion ("action").
+ 
+ ### Switching
+ 
+ Los paquetes son direccionados del puerto de entrada al de salida. se puede lograr de varias maneras:
+ 
+ * **via memoria**: el switching lo hacía la CPU. Con los puertos siendo dispositivos de entrada y salida. Se copiaba el contenido del paquete (avisando con una interrupción en el BUS) a la memoria del procesador y se copiaba en el de salida. No se podía direccionar más de un paquete a la vez. Actualmente algunos lo hacen, pero actúan más como multiprocesadores con memoria compartida
+ ![image](https://user-images.githubusercontent.com/71232328/163682062-9e7a60f4-37d2-408e-afe3-d5a6b643e9fc.png)
+ 
+ * **via Bus** : un puerto de entrada transfiere el paquete directamente al puerto de salida sobre un bus compartido. Todos los puertos de salida reciben el paquete, pero solo el indicado por el puerto de entrada se lo queda. El label introducido por el puerto de entrada es retirado luego de llegar al puerto de salida. La velocidad de switcheo se ve limitada por la del bus
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163682268-40205bd3-5075-4b95-b4df-73302ef9e35e.png)
+
+* **via interconnection network**: para superar las restricciones del bus compartido. 2N buses que conectan N puertos de entrada con N puertos de salida. Un **switch crossbar** es no bloqueante, salvo que 2 paquetes provenientes de dos puertos de entrada distinto tengan como destino el mismo puerto de salida.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163682354-8aff3669-7d09-41cf-ae69-057ad10f0ed1.png)
+
+ ### Procesamiento en puertos de salida
+ 
+ Se transmiten los paquetes hacia los links de salida. Incluye seleccionar y desencolar los paquetes, ademas de realizar la transmision capa de linkeo y capa fisica.
+ ![image](https://user-images.githubusercontent.com/71232328/163682487-8dfc52e6-ab93-4b81-a2bb-4fa4a24c5eb8.png)
+
+ ### Donde ocurre el Queuing
+ 
+ Es en los routers donde se dropean o pierden paquetes.
+ 
+ ### Encolado en puertos de entrada
+ 
+ Si el **switch fabric** no es lo suficientemente rápido para transferir los paquetes que llegan, estos comienzan a encolarse en los puertos de entrada. **head-of-the-line (HOL) blocking** se da cuando un paquete debe esperar a ser tranferido a través de la fabrica (auqneu el puerrto de salida esté libre), porque otro paquete en la cabeza de la fila está bloqueado. Esto puede llevar a pérdida de paquetes.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163682630-e57cd4a8-b4bf-449c-9429-b788aec967e9.png)
+
+ 
+ ### Encolado en puertos de salida
+ 
+ Si el **switching fabric** es considerablemente más rapido que las lineas de los puertos, pueden llegar más paquetes al puerto de los que puede tranmitir al link de salida, teniendo que encolarlos y pudiendo generar pérdida de paquetes. Cuando se supera la capacidad del buffer, se puede dropear (**drop-tail**) o remover ya encolados apra hacer lugar a los recien llegados. Acciones para control de congestion son llamadas **active queue management**, los algoritmos más usados son **random early detection (RED**.
+ En los puertos de salida, un **packet scheduler** define que paquete se transmitirá. El tamaño del buffer puede ser RTT * la capacidad del link.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163682696-8dcdd9c1-e75b-4237-85ce-f349108c713b.png)
+
+ ### Packet scheduling
+ 
+ #### FIFO
+ 
+ Selecciona los paquetes para ser transmitidos en el mismo orden en que llegaron
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163682902-df3eaa24-4005-49fc-be71-24168e689062.png)
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163682973-b35a3cc4-7128-4dcc-8ca6-98e421fe5a13.png)
+
+ #### Priority Queuing
+ 
+ se les asigna una prioridad a los paquetes cuando llegan. Por ejemplo, aquellos que llevan información acerca del manejo de la red tendrán mayor prioridad. Cada clase tendrá su cola. Se transmitirá el paquete de la cola con más alta prioridad
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163683042-ccf53758-f276-457b-9ca0-833a98c4441b.png)
+
+ Los paquetes claritos tienen menor prioridad que los azul oscuro
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163683071-d7c01813-3f90-4c1e-bac4-0f6ad29e9834.png)
+
+ **non-preemptive priority queuing** implica que una vez que se comienza a transmitir un paquete, no se interrumpe.
+ 
+ #### RoundRobin y Weighted Fair Queuing (WFQ)
+ 
+RR alterna el servicio entre las clases: por ejemplo clase 1,2,1,2,etc. **work-conserving queuing**, si no hay paquetes en una cola, inmediatamente pasa a la siguiente y así sucesivamente. WFQ es una generalización de RR. Se va a atender cada clase de manera circular.
+ ![image](https://user-images.githubusercontent.com/71232328/163683181-89bc666e-6d4c-47aa-b8ce-56ba1725947d.png)
+ A diferencia de RR, en un intervalo de tiempo cada clase recibirá un diferencial de tiempo de atención justo
+ 
+ ## Protocolo de Internet (IP): IPv4, IPv6
+
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163683116-894b4bed-a4db-4201-8798-a1be8575d658.png)
+
+
  
 </details>
 
