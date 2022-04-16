@@ -1035,6 +1035,45 @@ Si pudiera hacerse que UDP fuera justo, igualmente habría un problema: las cone
 <details>
  <summary> Capítulo 4 🍾</summary>
  
+ Capa de red puede dividirse en dos partes que interactuan: plano de datos y plano de control.
+ 
+ ## Análisis de capa de red
+ 
+ El principal rol del plano de datos es direccionar el datagram del link de entrada del router, al de salida. La tarea del plano de control, es coordinar estas acciones locales para que los datagrams sean transferidos ent-to-end a través de los routers
+ 
+ ### *Forwarding* y *Routing*
+ 
+ * **Forwarding**: Cuando llega un paquete al link de entrada de un router, este debe mover el paquete al link de salida apropiado. Implementado en el plano de datos. Accion local del router, implementada en hardware
+ * **Routing**: debe determinarse el camino a tomar por lo paquetes, de tal manera que lleguen a destino. estos son llamados **Algoritmos de routeo**. Accion que abarca la totalidad de la red, implementada en software.
+ 
+ Cada router tiene una **forwarding table**, un router forwardea un paquete indexando esta tabla con los campos del header del paquete. El valor indica el link de salida
+ 
+ Cómo se configura esa tabla? El algoritmo de routeo determina el contenido de las tablas
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163680879-e1b8bf37-cb21-483b-98b6-f2a6fd61b14c.png)
+ 
+ Existen otras maneras de implementar la funcionalidad del plano de contro para determinar el contenido de las tablas de forwardeo. Este es el caso de un controlador remoto, separado fisicamente de los routers
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163681005-d6f34feb-6105-452b-8764-0a101157dd1e.png)
+
+Esta implementacion es el corazón del **software-defined networking (SDN)**. El controlador que interactúa con los routers está implementado en software.
+ 
+ ### Modelo de servicio de la red
+ 
+ El **network servide model** define características del envío end-to-end de paquetes entre los hosts. La capa de red podría ofrecer:
+ 
+ * Garantizar envío
+ * Garantizar envío con un delay límite
+ * Los paquetes llegan en orden
+ * Garantiza un ancho de banda mínimo
+ * seguridad
+ 
+ Sin embargo la capa de red solo ofrece uno: **servicio del mejor esfuerzo** o **best Effort**. Soo garantiza que va a hacer todo lo posible para que llegue el paquete a destino.
+ 
+ ## Qué hay dentro de un router?
+ 
+ 
+ 
  
 </details>
 
