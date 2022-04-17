@@ -2,8 +2,7 @@
 
 ### Resumen del Libro
 
-<details>
- <summary>  <h3>Capitulo 1 red de computadoras e Internet</h3> 🍾 </summary> 
+<h3>Capitulo 1 red de computadoras e Internet</h3>
  
  </br>
 
@@ -197,12 +196,9 @@ Malware (?)
 
 
 
-</details>
 
-
-<details>
  
-<summary> <h3>Capitulo 2 Capa de aplicación</h3> 🍾</summary>
+<h3>Capitulo 2 Capa de aplicación</h3> 
  
 </br>
  
@@ -569,12 +565,9 @@ while True:
 
 ```
 
- 
-</details>
 
-<details>
  
- <summary> <h3>Capitulo 3 capa de transporte</h3> 🍾 </summary> </br>
+<h3>Capitulo 3 capa de transporte</h3>  </br>
  
 Capa de transporte reside entre la de aplicación y la de red. Se encarga de proveer servicios de comunicacion a los procesos de aplicación corriendo en diferentes *hosts*.
 
@@ -1029,11 +1022,8 @@ Si pudiera hacerse que UDP fuera justo, igualmente habría un problema: las cone
 
 
 
-</details>
 
-
-<details>
- <summary> <h3>Capítulo 4 Capa de red: plano de datos </h3>🍾</summary>
+ <h3>Capítulo 4 Capa de red: plano de datos </h3>
  
  Capa de red puede dividirse en dos partes que interactuan: plano de datos y plano de control.
  
@@ -1313,15 +1303,11 @@ Open flow no permite matchear el campo TTL entre otros. Esto por el tradeoff ent
  
  Caso común de uso de la tabla es *load balancing* y *firewall*
  
-  
-</details>
-
-<details>
- <summary> <h3>Capítulo 5 capa de red: plano de control </h3>🍾</summary>
+<h3>Capítulo 5 capa de red: plano de control </h3>
 
  Controla como se redireccionan los paquetes entre routers en un camino end-to-end y como se configuran y manejan los componentes y servicios de la capa de red.
  
  ## Introducción
  
  
-</details>
+
