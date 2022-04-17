@@ -1,8 +1,7 @@
 # Introducción A Sistemas Distribuidos - 75.43
 
-### Resumen del Libro
 
-<h3>Capitulo 1 red de computadoras e Internet</h3>
+<h1>Capitulo 1 red de computadoras e Internet</h1>
  
  </br>
 
@@ -198,7 +197,7 @@ Malware (?)
 
 
  
-<h3>Capitulo 2 Capa de aplicación</h3> 
+<h1>Capitulo 2 Capa de aplicación</h1> 
  
 </br>
  
@@ -366,11 +365,11 @@ Entonces se usa una base de datos descentralizada y jerárquica:
  ![image](https://user-images.githubusercontent.com/71232328/160655196-18c555d5-a09d-4e82-8355-98b000ddccc0.png)
 
  
- #### DNS Caching
+ <h4> DNS Caching </h4>
  
  Para mejorar el delay del sistema DNS y disminuir los mensajes DNS. Se *cachea* el par *hostname*/IP. Esta tarea la realiza el servidor local DNS
  
- #### Mensjaes DNS
+  <h4> Mensjaes DNS </h4>
  
  Los servidores DNS almacenan *resource records (RRs)*. Cada respuesta DNS lleva uno o mas de estos: (Name, Value, Type, TTL).
  
@@ -567,7 +566,7 @@ while True:
 
 
  
-<h3>Capitulo 3 capa de transporte</h3>  </br>
+<h1>Capitulo 3 capa de transporte</h1>  </br>
  
 Capa de transporte reside entre la de aplicación y la de red. Se encarga de proveer servicios de comunicacion a los procesos de aplicación corriendo en diferentes *hosts*.
 
@@ -1023,7 +1022,7 @@ Si pudiera hacerse que UDP fuera justo, igualmente habría un problema: las cone
 
 
 
- <h3>Capítulo 4 Capa de red: plano de datos </h3>
+ <h1>Capítulo 4 Capa de red: plano de datos </h1>
  
  Capa de red puede dividirse en dos partes que interactuan: plano de datos y plano de control.
  
@@ -1303,7 +1302,7 @@ Open flow no permite matchear el campo TTL entre otros. Esto por el tradeoff ent
  
  Caso común de uso de la tabla es *load balancing* y *firewall*
  
-<h3>Capítulo 5 capa de red: plano de control </h3>
+<h1>Capítulo 5 capa de red: plano de control </h1>
 
  Controla como se redireccionan los paquetes entre routers en un camino end-to-end y como se configuran y manejan los componentes y servicios de la capa de red.
  
