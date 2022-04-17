@@ -3,7 +3,7 @@
 
 <h1>Capitulo 1 red de computadoras e Internet</h1>
  
- </br>
+ 
 
 *host* o *end systems*: dispositivos conectados a la red (lapotot, tablet, reloj, etc).
 
@@ -38,7 +38,7 @@ Los *end systems* proveen interfaces para *sockets* que especifican como solicit
 
 ![image](https://user-images.githubusercontent.com/71232328/160490600-228c2304-3668-4ec8-883f-a11a39c9c6a2.png)
 
-</br>
+
 
 Un protocolo define el formato y orden de los mensajes a intercambiar entre dos o mas entidades en comunicacion, al igual que las acciones a tomar luego de enviar/recibir los mensajes
 Ambos que se esten comunicando deben estar utilizando el mismo protocolo
@@ -53,18 +53,18 @@ El acceso a internet residencial mas comun es por *digital suscriber line (DSL)*
 ![image](https://user-images.githubusercontent.com/71232328/160491855-2dd767ac-9f61-494a-b1af-6c0cfa0d3f2b.png)
 
 
-</br>
+
 
 Existen estándares para DSL que definen multiples *transmission rates*.
 
 Por otra parte, los cables de acceso a internet hacen uso del cable del proveedor de television.
 
-</br>
+
 
 ![image](https://user-images.githubusercontent.com/71232328/160492070-cf203c45-c8c1-4129-936f-73eaa410c91a.png)
 
 
-</br>
+
 
 requiere modems especiales para cable, en general conectados a la PC por un puertp *ethernet*. En estos casos los *packets* llegan a todos. Los *channel* de subida y bajada son compartidos.
 
@@ -76,7 +76,7 @@ Más veloz que los ultimos dos pero menos común en *fiber to home (FTTH)*.
 ![image](https://user-images.githubusercontent.com/71232328/160492621-8adc1fa6-4871-415c-a273-36bc2eca2d63.png)
 
 
-</br>
+
 
 Tambien es posbile tener una *wireless LAN* basada en IEEE (*WIFI*)
 
@@ -199,7 +199,7 @@ Malware (?)
  
 <h1>Capitulo 2 Capa de aplicación</h1> 
  
-</br>
+
  
 Al desarrollar una aplicación, hay que escribir software de tal manera que pueda correr en multiples sistemas (no es necesario en *routers* o *link-layer switches*, estos no funcionan en la capa de aplicación). La arquitectura de la aplicación está diseñada por el desarrollador, a diferencia de la arquitectura de la red. Esta puede ser cliente-servidor o *peer-to-peer*.
 
@@ -566,7 +566,7 @@ while True:
 
 
  
-<h1>Capitulo 3 capa de transporte</h1>  </br>
+<h1>Capitulo 3 capa de transporte</h1>  
  
 Capa de transporte reside entre la de aplicación y la de red. Se encarga de proveer servicios de comunicacion a los procesos de aplicación corriendo en diferentes *hosts*.
 
@@ -655,7 +655,7 @@ Esto quiere decir que ningún bit será corrompido o perdido, además serán env
   <img src="https://user-images.githubusercontent.com/71232328/161105952-7214bdff-3947-4e38-beae-4e64a60511a2.png" width="340" />
   <img src="https://user-images.githubusercontent.com/71232328/161106055-34ea2161-95cd-4ea7-88ce-47345d0ddef8.png" width="340" /> 
 </p>
-</br>
+
 
 Asumimos que los paquetes llegarán en el orden enviado, pero podrán perderse. Consideramos la transferencia en un solo sentido (**unidireccional**). 
 
@@ -685,13 +685,13 @@ bits en un paquete pueden ser corrompidos. El que recibe usa un protocolo de men
 Se explica bastante sola la imagen. El que envia espera el **acknowledgment** y en base a eso reenvia o espera otro paquete para enviar de la capa superior. El que recibe si está corrupto envia un NAK, si esta todo OK, extrae la data y envía un ACK. qué pasa si el paquete ACK o NAK es corrupto!? Hay que agregarle cheksums. El que envia no tiene manera de saber si los recibió bien o mal.
 Se podrían agregar bits de cheksum para recuperar los perdido. Otra es que el que envia, reeenvie el paquete si recibe un NAK o ACK corrupto, pero esto genera **duplicate packets**, donde el que recibe no sabe si el NAK o ACK que envió llegó bien.
 Entonces se agregar un **sequence number** al packet, permitiendo que el receptor pueda determinar si es una retransmision.
-Del lado del que envía, la **FSM** queda así: </br>
+Del lado del que envía, la **FSM** queda así: 
 ![image](https://user-images.githubusercontent.com/71232328/161118965-e4d3fde6-bdda-4a19-b37c-598097cd8f4d.png)
-</br>
+
 Del lado del receptor:
-</br>
+
 ![image](https://user-images.githubusercontent.com/71232328/161119114-e87ceaa6-b008-4274-b5b9-294f21023da6.png)
-</br>
+
 
 #### Reliable Data Transfer sobre un canal con errores de bits y pérdida de paquetes
 
@@ -710,7 +710,7 @@ Como los números de secuencia de los paquetes cambian entre *0* y *1*, a este p
   <img src="https://user-images.githubusercontent.com/71232328/161120034-8b41992b-3ec2-4aa4-b8d3-3c08f05fb48b.png" width="250" /> 
 </p>
 
-</br>
+
 
 <p float="left" align="middle">
   <img src="https://user-images.githubusercontent.com/71232328/161120062-eb1f3d83-70de-4f82-a4d7-454189c26106.png" width="250" />
@@ -730,7 +730,7 @@ La performance del protocolo anteriror será mala porque es un protocolo de tipo
 </p>
 
 
-</br>
+
 
 Para solucionar el problema de performance que acarrea el *stop-and-wait*, el que envía lo hace con multiples paquetes sin esperar **acknowledgments**. Esta tecnología se llama **pipelining**. 
 
