@@ -1283,14 +1283,45 @@ El máximo tamaño de paquetes de la capa de red que pueden transportar los prot
  ## Forwaring generalizado y SDN
  
  
+ En forwarding generalizado, las decisiones pueden tomarse usando orgien y destino tanto de la capa de enlace como de la capa de red
  
- 
+![image](https://user-images.githubusercontent.com/71232328/163718853-5b8f8269-4467-420b-95f5-1c9597281f85.png)
 
+ Hay una matchu-plus-table en cada packet switch, mantenida por el controlador remoto. Primero analizamos a OpenFlow, pionero en este campo. Cada entrada de la **flow table** incluía:
  
+ * *Set de valores del campo del header*, sobre los que podía matchear un packet que llegara. Si un paquete no matchea ninguna entrada, se dropea o envía al controlador remoto para mejor procesamiento
+ * *contadores* que son actualizados a medida que los paquetes matchean las entradas de la tabla. 
+ * *set de acciones a tomar* cuando ocurre un matcheo: redireccionar, dropear, hacer copias o reescribir campos del header.
  
+ La flow table termina siendo una API
  
+ ### Match
+ Los campos del header del paquete que pueden matchear en OpenFlow:
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163719211-49b79fce-f4b7-45ca-8f8a-46386a74994f.png)
+ 
+ OpenFlow permite matcheos en campos de 3 capas de headers de protocolo. origen y destino MAC son de la capa de enlace. OpenFlow puede comportarse tanto como router (capa 3) redireccionando datagrams, como un switch (capa 2) forwarding frames (de la capa de enlace). Las tablas tambien pueden tener *wildcardas*: por ejemplo 128.119.*.* lo matchea cualquier direccion que los primeros 16 bits tengan 128.119.
+Open flow no permite matchear el campo TTL entre otros. Esto por el tradeoff entre funcionalidad y complejidad.
+ 
+ ### Action
+ 
+ Si hay multiples acciones de acuerdo a una entrada en latabla, se realizan en el orden propuesto. Las mas importantes son:
+ 
+ * **Forwarding**: a un puerto de salida, broadcast a todos los puertos o multicast a un set de puertos. También encapsulado y enviado al controlador remoto para procesamiento
+ * **Droping**: si la entrada de la tabla no tiene acciones, dropea el packet
+ * **Modify-field**: Los valores en 10 campos del header pueden ser reescritos antes de redireccionar al packet
+ 
+ Caso común de uso de la tabla es *load balancing* y *firewall*
+ 
+  
 </details>
 
 <details>
  <summary> <h3>Capítulo 5 capa de red: plano de control </h3>🍾</summary>
 
+ Controla como se redireccionan los paquetes entre routers en un camino end-to-end y como se configuran y manejan los componentes y servicios de la capa de red.
+ 
+ ## Introducción
+ 
+ 
+</details>
