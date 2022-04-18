@@ -1357,7 +1357,7 @@ Otra forma de clasificarlos es por si son **estáticos** (los caminos cambian le
  
 
  
- [![Demo dijkstra](https://j.gifs.com/qQo0D2.gif)](https://www.youtube.com/watch?v=GazC3A4OQTE&t=330s)
+ [![Demo dijkstra](https://j.gifs.com/qQo0D2.gif)](https://www.youtube.com/watch?v=GazC3A4OQTE)
 
 El problema con este algoritmo es que puede haber oscilaciones en cuanto al mejor camino en cada nuevo cálculo
  
@@ -1369,4 +1369,8 @@ El problema con este algoritmo es que puede haber oscilaciones en cuanto al mejo
  <h3> Distance-Vector Routing Algorithm </h3>
  
  El más usado actualmente
+ 
+  [![Demo dijkstra](https://j.gifs.com/Y7ZAY0.gif)](https://www.youtube.com/watch?v=NdKcjKfJocE)
+ 
+ 
  
