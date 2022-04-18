@@ -1326,8 +1326,47 @@ Open flow no permite matchear el campo TTL entre otros. Esto por el tradeoff ent
  La **forwarding table** (*destination-based forwarding*) y la **flow table** (*generalized forwarding*) solo los principales elementos que enlazaban los planos de datos y control de la capa de red. Vamos a ver como se mantienen, computan e instalan.
  Hay 2 formas de encararlo:
 
- * **Per-router control**: un algoritmo de routeo corre en cada router
+ * **Per-router control**: un algoritmo de routeo corre en cada router. Cada router tiene un componente de routeo que se comunica con el componente de otro router para computar los valores de las tablas
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163880622-4a485a75-0ea9-4d5a-998a-bedeef353b10.png)
+
+ * **control centralizado logicamente**: se computan centralmente y se distribuye. El control interactua con un *control agent (CA)* en cada router en base a un protocolo.
+ 
+ <h2> Algortimos de routeo </h2>
+ 
+ El fin es determinar buenos caminos (menor costo)entre *senders* y *receivers*. Para realizarlo se usan **grafos**.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163881145-15a17949-69ae-4b12-8f28-5ffb53d47ed5.png)
+
+ 
+ Recordar concepto de peso en la arista (sería la distancia en este caso), vecino y grafo no dirigido. El camino queda definido por la secuencia de nodos a visitar, y su costo por la suma del peso de las aristas. Si todas tienen el mismo peso, el camino menos costoso coincide con el más corto
+ ![image](https://user-images.githubusercontent.com/71232328/163880835-f260611a-3872-4c21-a2a2-4724a7b22ba8.png)
+
+ Clasificación de algoritmos:
+ 
+ * **Algoritmo de routeo centralizado**: computa el camino menos costoso usando la completitud de la red, es decir que obtiene la información de toda la red para realizar el cómputo. Una vez obtenida, el calculo puede hacerse centralmente o en cada router. La clave es que tiene conocimiento del estado global de la red, se los llama **link-state (LS) algorithms**.
+ * **Algoritmo de routeo descentralizado**: el cómputo se realiza de manera iterativa y distribuitva por los routers. Cada nodo comienza únicamente con la información de sus vecinos y en base a intercambios va calculando el camino menos costoso. El algoritmo a estudiar se llama *distance-vector (DV)*
+ 
+Otra forma de clasificarlos es por si son **estáticos** (los caminos cambian lentamente a lo largo del tiempo, en gral por intervención humana) o **dinámicos** (cambian a medida que lo hace el tráfico en la red o cambia la red).
+ 
+ Una tercera forma de clasificar es si son **load-insensitive** o **load-sensitive**. En este último, el valor de los links cambia para reflejar el tráfico. Actualmente son *insensitive*, ya que el valor no refleja su estado actual o pasado de congestión
+ 
+ <h3> Link-State Routing Algorthm </h3>
+ 
+ Para tener la información global, cada nodo hace un broadcast de su estado (vecinos y costos) a todos los nodos de la red. Se llama algortmo **link-state broadcast**. Luego cada nodo puede realizar el cálculo. Se puede usar el algoritmo de *dijkstra*. La complejidad es O(n cuadrado)
  
 
  
-</details>
+ [![Demo dijkstra](https://j.gifs.com/qQo0D2.gif)](https://www.youtube.com/watch?v=GazC3A4OQTE&t=330s)
+
+El problema con este algoritmo es que puede haber oscilaciones en cuanto al mejor camino en cada nuevo cálculo
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163884428-fc245dba-ddc2-4a4b-95e3-890ba8841826.png)
+![image](https://user-images.githubusercontent.com/71232328/163884448-b5d326b7-9079-4890-aea1-5375edfdd21c.png)
+
+ Se podría solucionar haciendo que el costo del enlace no dependa del tráfico, no tiene sentido porque el tráfico es lo que nos va a definir si está congestionado el enlace o no. Otra es que no todos los routers corran el algoritmo LS con la misma periodicidad. Los routers pueden sincronizarse entre ellos, para evitarlo se hace ejecutar el algoritmo cada un tiempo aleatorio.
+ 
+ <h3> Distance-Vector Routing Algorithm </h3>
+ 
+ El más usado actualmente
+ 
