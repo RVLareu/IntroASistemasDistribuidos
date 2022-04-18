@@ -1,6 +1,6 @@
 # Introducción A Sistemas Distribuidos - 75.43
 
-### Resumen del Libro
+<h3> Resumen del Libro </h3>
 
 <details>
  <summary>  <h3>Capitulo 1 red de computadoras e Internet</h3> 🍾 </summary> 
@@ -21,7 +21,7 @@ El *packet switch* toma el *packet* que viene de su *comunication link* de entra
 
 El camino recorrido por el *packet* es el *route* o *path*.
 
-#### Analogia
+ <h4> Analogia </h4>
 
 *packets* = camiones.
 *comunication links* = rutas.
@@ -36,7 +36,7 @@ Las piezas que componen internet corren protocolos para controlar envio y recepc
 El internet tambíen puede ser descripto como una infraestructura que provee servicios a aplicaciones (*distributed applications*). Corren en *end systems*.
 Los *end systems* proveen interfaces para *sockets* que especifican como solicitar y enviar informacion a otro *end system*
 
-#### Protocolo
+<h4> Protocolo </h4>
 
 ![image](https://user-images.githubusercontent.com/71232328/160490600-228c2304-3668-4ec8-883f-a11a39c9c6a2.png)
 
@@ -88,7 +88,7 @@ Tambien es posbile tener una *wireless LAN* basada en IEEE (*WIFI*)
 
 Los bits se propagan a través de un medio físico: par trenzado, coaxial, fibra optica, espectro radial, etc. Puede ser un medio guiado o no. En el primer caso las ondas son guiadas a traves de un medio fisico (cable). En el caso de no ser guiado, las ondas se propagan por la atmosfera y espacio (*wireless LAN*). Un par trenzado conocido es el *Unshielded twisted pair (UTP)*. El cable coaxial puede ser usado como un medio compartido. La fibra optica traslada pulsos de luz, pero los dispositivos opticos son muy costosos. Canales de transmision radial sufren mayor interferencia y tienen tres categorias: distancia corta, locales y largo alcance (kilometros). Canales de transmision satelital transmiten/reciben microondas en bandas de frecuencia determinadas, los satelites pueden ser geoestacionarios u orbitar más cerca de la tierra.
 
-#### Core
+ <h4> Core  </h4>
 
 *end systems* intercambian mensajes. Estos mensajes se dividen en *packets* para ser enviados. Cada *packet* viaja a través de *communication links* y *packet switches (routers or link-layer switches)*. Se transmite al *rate* del *communication link*. Entonces si el *rate* es R y el largo del *link* es L, el tiempo de transmisión es `L/R segundos`.
 
@@ -155,7 +155,7 @@ El delay entre *end systems* con N-1 *routers* entre ellos es `dend-end = N(dpro
 
 ![image](https://user-images.githubusercontent.com/71232328/160523899-188591c9-c409-4030-8e76-1d3522770391.png)
 
-### Protocol Layering
+ <h3> Protocol Layering  </h3>
 
 cada protocolo se corresponde con una capa.
 
@@ -163,23 +163,23 @@ Protocolos de la capa de aplicacion siempre estan implementadas en software. La 
 
 ![image](https://user-images.githubusercontent.com/71232328/160524387-999652a6-db64-4d99-9ed4-cc0fc7e4193f.png)
 
-#### Capa de aplicaciones
+ <h4> Capa de aplicaciones  </h4>
 
 donde residen las aplicaciones de red y sus protocolos como HTTP, SMTP, FTP, DNS. Se distribuye sobre muchos *end systems*. La aplicacion en uno intercambiendo *packets* con la aplicación en otro *host* siguiendo un protocolo. En esta capa la data son mensajes.
 
-#### Capa de transporte
+ <h4> Capa de transporte  </h4>
 
 transporta los mensajes de la capa de aplicacion entre *end points*. Protocolos: TCP y UDP
 
-#### Capa de red
+ <h4> Capa de red </h4>
 
 Mueve los *packets* de la capa de red llamados *datagrams* de un *host* a otro. Protocolo IP, que define los campos en el *datagram*. También hay *routing protocols* para determinar las rutas que toman los *datagrams*.
 
-#### Capa de linkeo
+ <h4> Capa de linkeo </h4>
 
 Para mover un *packet* entre un nodo y tro (*host* o *router*), la capa de red acude a la capa de linkeo. Aquí se pasa el *datagram* a la capa de linkeo, que lo lleva al proximo nodo, donde vuelve a la capa de red. Como ejemplo son Ethernet, Wifi. Un *datagram* puede ser manejado por distintos protocolos en la capa de linkeo.
 
-#### Capa de física
+ <h4> Capa de física </h4>
 
 Su trabajo es mover bits entre un nodo y el siguiente. Los protocolos dependen del medio (fibra, par trenzado, etc). Ethernet tiene varias protocolos en esta capa: una para par trenzado, otro para coaxial, fibnra, etc.
 
@@ -187,7 +187,7 @@ Su trabajo es mover bits entre un nodo y el siguiente. Los protocolos dependen d
 
 Notar que routers y switches de la capa de linkeo no implementan todas las capas. En cada capa un *packet* tiene dos campos: *header* y *payload*. El ultimo es un *packet* de la capa anterior y *header* sirve para que la capa actual actue. A esto se llama encapsulacion.
 
-### OSI
+<h3> OSI </h3>
 
 Otra forma de ver los protocolos distinta al *stack*.
 
@@ -202,7 +202,7 @@ Malware (?)
 
 <details>
  
-<summary> <h3>Capitulo 2 Capa de aplicación</h3> 🍾</summary>
+<summary> <h2>Capitulo 2 Capa de aplicación</h2> 🍾</summary>
  
 </br>
  
@@ -212,7 +212,7 @@ En la arquitectura cliente-servidor , siempre hay un *host* llamado servidor que
  
 En la arquitectura P2P no hay servidores dedicados, se basa en la comunicacion entre usuarios (ej: Torrent). Esta arquitectura es auto escalable.
  
-### Comunicacion
+<h3> Comunicacion </h3>
  
 Los que se comunican no son los programas, sino los procesos en diferentes (o el mismo) *end systes*. Lo hacen mediante mensajes. En general en una comunicacion, uno es el cliente y el otro el servidor. El que inicia la conexion es el cliente, el que espera a ser conectado, el servidor. Los mensajes se envian y reciben a través de una interfaz de software llamada *socket*. El *socket* es la interfaz entre la capa de aplicacion y la de transporte. También llamada *application programming interface (API)* entre la aplicacion y la red.
  
@@ -225,7 +225,7 @@ La aplicacion envia mensajes por el socket, la capa de transporte debe llevarlos
 * *Timing*: un tiempo máximo de arribo del paquete desde que sale hasta que llega al socket receptor (delay).
 * *Security*: puede proveer mas de un servicio de seguridad. Puede encriptar los datos al salir y desencriptarlos al llegar.
  
-### Servicios de transporte provistos por internet
+<h3> Servicios de transporte provistos por internet </h3>
  
 Las redes TCP/IP tienen 2 protocolos de transporte: UDP y TCP.
  
@@ -246,7 +246,7 @@ Servicios de UDP:
  
 En ambos casos, no se proveen servicios para *throughput* y *timing*.
  
-### Protocolos de capa de aplicación
+<h3> Protocolos de capa de aplicación </h3>
  
 Definen como los procesos de aplicaciones se envian mensajes entre ellas:
 * tipo (request o respuesta)
@@ -1321,7 +1321,13 @@ Open flow no permite matchear el campo TTL entre otros. Esto por el tradeoff ent
 
  Controla como se redireccionan los paquetes entre routers en un camino end-to-end y como se configuran y manejan los componentes y servicios de la capa de red.
  
- ## Introducción
+ <h2> Introducción </h2>
  
+ La **forwarding table** (*destination-based forwarding*) y la **flow table** (*generalized forwarding*) solo los principales elementos que enlazaban los planos de datos y control de la capa de red. Vamos a ver como se mantienen, computan e instalan.
+ Hay 2 formas de encararlo:
+
+ * **Per-router control**: un algoritmo de routeo corre en cada router
+ 
+
  
 </details>
