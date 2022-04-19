@@ -1366,11 +1366,142 @@ El problema con este algoritmo es que puede haber oscilaciones en cuanto al mejo
 
  Se podría solucionar haciendo que el costo del enlace no dependa del tráfico, no tiene sentido porque el tráfico es lo que nos va a definir si está congestionado el enlace o no. Otra es que no todos los routers corran el algoritmo LS con la misma periodicidad. Los routers pueden sincronizarse entre ellos, para evitarlo se hace ejecutar el algoritmo cada un tiempo aleatorio.
  
+ ```
+ 
+Initialization:
+ N’ = {u}
+ for all nodes v
+  if v is a neighbor of u
+   then D(v) = c(u, v)
+  else D(v) = ∞
+
+Loop
+ find w not in N’ such that D(w) is a minimum
+ add w to N’
+ update D(v) for each neighbor v of w and not in N’:
+      D(v) = min(D(v), D(w)+ c(w, v) )
+  /* new cost to v is either old cost to v or known
+   least path cost to w plus cost from w to v */
+until N’= N
+ 
+ ```
+ 
  <h3> Distance-Vector Routing Algorithm </h3>
  
- El más usado actualmente
+ El más usado actualmente, es iterativo, asincrónico y distribuido. **Distribuido**: cada nodo recibe información de sus vecino directos, realiza el cómputo y distribuye el resultado a sus vecinos directos. **Iterativo**: continúa hasta que no haya más información para intercambiar entre vecinos. **Asincronico**: no requiere que todos los nodos operen coordinados entre ellos.
  
-  [![Demo dijkstra](https://j.gifs.com/Y7ZAY0.gif)](https://www.youtube.com/watch?v=NdKcjKfJocE)
+ Si se tiene el costo del camino menos costoso entre dos nodos, entonces los costos vienen relacionados por la ecuación de Bellman-Ford:
+ 
+ ```
+ dx(y) = minv{c(x,v) + dv(y)}
+ 
+ ```
+ 
+ Donde `dx(y)` es el costo del camino menos costoso de `x` a `y`. `minv` es sobre todos los vecinos de `x`. Despues de viajar de `x` a `v`, si se toma el camino menos costoso de `v` a `y`, el costo del camino será `c(x,v)+dv(y)`, con `v` siendo alguno de todos los vecinos de `x`.
+ 
+ La solución a la ecuación es lo que estará en las entradas de la tabla de ~forwarding*. En **DV** cada nodo x mantiene la siguiente información de routeo:
+ 
+ * Por cada vecino `v`, `c(x,v)`
+ * El vector de distancias, conteniendo las distancias estimadas a cada nodo
+ * Los vectores de distancias de cada uno de sus vecinos
+ 
+ Cada nodo envía eventualmente su vector de distancias a sus vecinos, quienes actualizan sus vectores resolviendo la ecuación de Bellman-Ford.
+ 
+ ```
+ 
+Initialization:
+ for all destinations y in N:
+  D (y)= c(x, y)/* if y is not a neighbor then c(x, y)= ∞ */
+ for each neighbor w
+  D (y) = ? for all destinations y in N
+ for each neighbor w
+  send distance vector D = [D (y): y in N] to w
+
+loop
+ wait (until I see a link cost change to some neighbor w or
+  until I receive a distance vector from some neighbor w)
+
+ for each y in N:
+  D (y) = min {c(x, v) + D (y)}
+
+if Dx(y) changed for any destination y
+ send distance vector D = [D (y): y in N] to all neighbors
+
+ forever
+ 
+ ```
+ Teoria en general
+ 
+  [![Demo DV](https://j.gifs.com/Y7ZAY0.gif)](https://www.youtube.com/watch?v=NdKcjKfJocE)
+ 
+
+
+ <h4> Ejemplo </h4>
+ 
+ Se empieza con 3 tablas de routeo para cada uno de los 3 nodos.
+ Cada nodo le envia su vector a los 2 vecinos (las flechas azules de la figura). Luego de recibir los vectores, cada nodo recalcula su propio vector de distancias.
+ Para el caso de `x`:
+ 
+ ```
+ Dx(x) = 0
+ 
+ Dx(y) = min{c(x,y)+Dy(y),c(x,z)+Dz(y)} = min{2+0, 7+1} = 2
+ 
+ Dx(z) = min{c(x,y)+Dy(z),c(x,z)+Dz(z)} = min{2+1,7+0} = 3
+ 
+ ```
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163896661-a06c28dc-0f86-470e-a569-388b90fe183c.png)
+
+ 
+ Luego se envían una tercera vez sus vectores y se actualizan los nodos que perciben cambios. Como no se envían mensajes de actualizacion, los nodos quedan "quietos" hasta que cambie el costo de un enlace.
+ 
+ <h4> DV: Link-cost changes y fallas del link </h4>
+ 
+ Cuando un nodo detecta un cambio en un enlace suyo hacia un vecino, actualiza su vector de distancias y si hay un cambio en el camino menos costoso, informa a los vecinos.
+ 
+![image](https://user-images.githubusercontent.com/71232328/163897054-0a4d25c0-e1aa-46e5-af7e-d83911b77eac.png))
+
+ `y` detecta cambio, informa a vecinos. `z` recibe info de `y` y actualiza a un nuevo camino menos costoso a `x` y lo envía. `y` recibe de `z` y actualiza tabla, sus caminos menos costosos no se modifican asi que el algoritmo alcanza un estado de espera.
+ 
+ Qué pasa si el costo se incrementa?
+ 
+
+ 
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/163897065-be9c860d-adcb-4d68-85dd-c90fc8d44682.png)
+Antes del cambio, `Dz(x)=5`.
+ `y` detecta que cambio el costo y computa nuevo camino menos costoso a `x` que ahora es 6 (se queda con que la distancia de z a x era 5 a través suyo). Acá hay un **rooting loop**, para llegar a `x`, `y` pasa por `z` y `z` pasa por `y`. Como `y` computó un nuevo camino menos costoso, le informa a `z`.
+ A `z` le llega que el camino menos costoso de `y` a `x` es 6. Entonces `z` computa que camino menos costoso a `x` es `Dz(x)=min{50+0,1+6}=7`, entonces informa a `y` del nuevo cambio....
+ Este proceso continúa en este caso 44 iteraciones hasta que se compute que el camino sea mayor a 50, donde no va a haber actualizaciones. Para evitar este escenario surge una solución
+ 
+ <h4> *Poisoned Reverse* </h4>
+ 
+ Si `z` pasa a través de `y` para llegar a `x`, entonces le va a advertir a `y` que su distancia a `x` es infinita: `Dz(x)=∞`. Como `y` piensa que `z` no tiene camino a `x`, no va intentar pasar por `z` mientras que `z` pase `y` para llegar a `x`.
+ 
+ Sin embargo, loops involucrando 3 o más nodos no serán detectados por esta técnica
+ 
+
+[![Demo DV](https://j.gifs.com/16Mlqo.gif)]( https://www.youtube.com/watch?v=f2ic7kVnhrs)
+ 
+ <h4> DV vs LS </h4>
+ 
+ En DV, cada nodo habla con su vecino directo. En LS se tiene una vision global de la red.
+ Si se tienen *N* routers y *E* enlaces:
+ 
+ * **Complejidad del mensaje**: en LS se deben enviar `O(|N| |E|)` mensajes para tener la información, esto también cada vez que hay un cambio en algun enlace. En DV es más complejo, es solo con los vecinos y los mensajes se propagan solo si hay cambios en los caminos menos costosos
+ 
+* *Velocidad de convergencia**: LS es un algoritmo de `O(|N| cuadrado )`. DV puede converger lentamente y además tiene el problema de *count-to-infinity*
+ 
+* **Robustez**: un nodo en LS computa solo su tabla de forwarding, por lo que se podría decir que los cálculos estan bastante independientes/separados. En DV, si un nodo falla o comunica incorrectamente, la propagación del error puede difundirse a toda la red. Más robusto LS
+ 
+ <h2>  Intra-AS Routing in the Internet: OSPF</h2>
  
  
  
+ 
+ 
+ 
+ 
+ 
+ </details>
