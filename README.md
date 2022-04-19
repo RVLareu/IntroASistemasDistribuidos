@@ -1495,9 +1495,26 @@ Antes del cambio, `Dz(x)=5`.
  
 * **Robustez**: un nodo en LS computa solo su tabla de forwarding, por lo que se podría decir que los cálculos estan bastante independientes/separados. En DV, si un nodo falla o comunica incorrectamente, la propagación del error puede difundirse a toda la red. Más robusto LS
  
- <h2>  Intra-AS Routing in the Internet: OSPF</h2>
+ <h2>  Intra-AS Routing en la Internet: OSPF</h2>
  
+ Se venía viendo a la red como un conjunto de routers indistinguibles, esto no es así por 2 razones:
  
+ * **Escala**: cuantos más routers, el overhead involucrado en computación, comunicacion se vuelve prohibitivo. Almacenar información para la cantidad de routers que hay es imposible.
+ * **Autonomía administrativa**: la internet es una red de ISPs. Cada uno opera la red como quiere u oculta aspectos de la misma por fuera de la organizacion. La red tendría que poder administrarse a piacere y poder comunicarse con el mundo exterior
+ 
+ Para solucionar estos problemas, se organizan los routers en **Sistemas autónomos (ASs)**, cada grupo bajo la misma administración. Cada sistema autónomo (router + enlaces) se identifica con su *número de sistema autónomo*. Los routers en el mismo AS corren el mismo algoritmo de routeo: **intra-autonomus system routing protocol**.
+ 
+ <h4> Open Shortest Path Fisrst (OSPF) </h4>
+ 
+ Es usado para intra-AS. *Open* porque la especificación  del algoritmo es pública. OSPF es link-state que usa información de link-state y dijkstra. Cada router construye un grafo del AS y después localmente corre dijkstra para toda la subnet. El costo de los links lo determina el administrador de la red.
+ 
+ Un router broadcastea a todos los del AS cada vez que hay un cambio en un enlace y también periódicamente. Contenidos en OSPF y llevador por IP, con un protocolo en la capa superiror de 89 para OSPF. También chequea que los enlaces funcionen (HELLO message).
+ Ventajas que trae OSPF:
+ 
+ * **Seguridad**: los intercambios entre routers pueden ser autenticados, solo participan routers confiables. Hay 2 tipos: simple y MD5. En simple, cada router tiene la misma contraseña, la cual se incluye en los packets. MD5 se basa en *keys* secretas compartidas. Se hashea el packet y se envía junto con la key. El que recibe, con su llave los hashea y verifica comparando con la key que traía.
+ * **Multiples caminos con el mismo costo**: permite que se usen varios si el costo es el mismo
+ * **Soporte integrado para unicast y multicast**: MOSPF agrega un nuevo tipo de estado de enlace a OSPF
+ * **soporte para jerarquías dentro del mismo AS**: cada área de un AS puede correr su propio algoritmo. Hay routers perimetrales para comunicarse con el resto de las áreas
  
  
  
