@@ -1637,4 +1637,15 @@ Prefijo por ej sería  138.16.68/22. BGP provee a los routers las formas para lo
  6. El administrador de las tablas usa OpenFlow para actualizar las entradas afectadas: s1,s2 y s4
  
  <h2> ICMP: Internet Control Message Protocol </h3>
+ 
+ Usado por hosts y routers para comunicar información de la capa de red entre ellos. El más común es para reportar un error. Los mensajes son transportados dentro de IP datagrams. Tienen un campo de tipo y otro de código. Además tienen el header y los primeros 8 bytes del IP datagram que causó que el mensaje ICMP fuera generado.
+ Un ejemplo de mensaje ICMP es *ping*. Otro mensaje es *source quench message*: se usaba para control de congestion.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/165164333-a303f008-a758-43f3-a4d4-2f6e63f8437e.png)
+
+ el programa de Traceroute  está implementado con mensajes ICMP
+ 
+ <h2> Network management y SNMP </h2>
+ 
+ 
  </details>
