@@ -1647,5 +1647,20 @@ Prefijo por ej sería  138.16.68/22. BGP provee a los routers las formas para lo
  
  <h2> Network management y SNMP </h2>
  
+ <h3> El framework para la administración de la red </h3>
+ 
+ Componentes clave:
+ 
+ * **administración de servidores**: controla el almacenamiento, procesamiento y disposicion de la informacion de administracion de la red. Acá se inician las acciones para controlar el comportamiento de la red.
+ * **Dispositivio administrado**: reside en una red administrada. Puede ser host, router, switch, middlebox, modem, etc. Puede haber varios **objetos administrados** en un dispositivo administrado. Estos son las piezas de hardware y los parametros de configuración de los componentes de hardware y software.
+* Cada objeto en un dispositivo administrado tiene información que es recolectada en una **Management Information Base (MIB)**. Un objeto MIB puede ser un contador, la cantidad de IP datagrams descartados por un router, etc. Estos objetos son especificados en un lenguaje llamado SMI. Objetos MIB relacionados se almacenan en módulos MIB.
+ * **Agente de administración de la red**: reside en cada dispositivo, un proceso que se comunica con los servidores de administración y toma acciones de alcance local bajo el control del servidor
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/165166082-91e4b853-fad8-46f5-8283-af9f4a3b2b6c.png)
+
+ 
+ * ** Protocolo de administracion de red**: Corre entre el servidor y los dispositivos. Lo usan los agentes para informar eventos. Pueden realizarce querys. Provee capacidades que un administrador de red puede usar
+ 
+ <h3> SNMP: Simple Network Management Protocol </h3>
  
  </details>
