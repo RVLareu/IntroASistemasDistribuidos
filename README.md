@@ -1517,8 +1517,70 @@ Antes del cambio, `Dz(x)=5`.
  * **soporte para jerarquías dentro del mismo AS**: cada área de un AS puede correr su propio algoritmo. Hay routers perimetrales para comunicarse con el resto de las áreas
  
  
+ <h2> Routing en ISPs: BGP </h2>
+ 
+ OSPF era un protocolo de routeo intra-AS. Cuando el *packet* viaja a través de múltiples AS, se precisan **Inter-autonomus system routing protocol**. Todos los AS corren el mismo, *Border Gateway Protocol*, o **BGP**
+ 
+ <h3> El rol de BGP </h3>
+ 
+ En BGP los packets no se routean a una IP en particular, sino a un prefijo *CIDRized*, donde cada prefijo representa una colleccion de subnets. Entonces, la tabla de formwarding va a tener entradas de la forma (prefijo, numero de interfaz de router). 
+Prefijo por ej sería  138.16.68/22. BGP provee a los routers las formas para lograr lo siguiente:
+ 
+ * **Obtener información de alcance del prefijo de su vecinos ASs**: permite a cada subnet mostrarle al resto que existe.
+ * **Determinar las mejores rutas a los prefijos**: el router corre localmente un procedimiento de seleccion BGP.
+ 
+ <h3> Advertising BGP Route Information </h3>
+ 
+ Para cada AS, cada router es **gateway router** (en el borde, se conecta con otro AS) o **internal router** (se conecta con hosts del mismo AS). Un AS envia un mensaje a otro diciendo que existe el router *x*, ese AS a su vez le comunica a otro AS que existe *x* y que se puede llegar a través de él. Asi sucesivamente.
+ 
+ Los routers se comunican mediante una conexion TCP semipermanente en el puerto 179: **BGP connection**. Si une dos ASs, se llama **external BGP (eBGP)**. Si une dos routers en el mismo AS, entonces se llama **internal BGP (iBGP)**.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/165154010-de6d6079-c9ee-48e1-bf9a-f4590299bdd6.png)
+
  
  
+ Para el *advertising* se usan ambos, eBGP para comunicarse con otro AS y iBGP para informar a los routers dentro del AS
  
+ <h3> Determinando las mejores rutas </h3>
+ 
+ Cuando un router publicita su prefijo a través de una conexion BGP, incluye varios **Atributos BGP**. Al prefijo junto con los atributos se lo llama **route**. Entre los atributos está el AS-PATH: lista de los ASs que atraviesa el camino, y NEXT-HOP: tiene la direccion IP de la interfaz de router que inicia el AS-PATH.
+ 
+ Algoritmos de routeo para BGP: arrancamos con **hot potato routing**. En este algoritmo, la ruta elegida es la que tenga el menor costo de NEXT-HOP. El router consutla la información intra-AS para ver el camino menos costoso al router NEXT-HOP y se queda con ese. En este algoritmo, 2 router del mismo AS pueden elegir caminos distintos para el mismo prefijo
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/165155139-147d13e2-b970-418c-80ec-7225652e784b.png)
+
+ 
+ <h4> Algoritmo de selección de ruta </h4>
+ 
+ Si hay más de una ruta para el mismo prefijo, se siguen las siguientes reglas:
+ 
+ * se le asigna una **local preference**: cuanto más alto, mas chance de ser elegido. Queda la decision en manos del administrador de la red AS.
+ 
+* De las rutas el mismo valor de *local preference*, se selecciona la que tiene el AS-PATH más corto.
+ 
+* De las que quedan con el mismo valor de *local preference* e igual AS-PATH, se usa *hot potatoe* y se elige la ruta con el NEXT-HOP más cercano
+ 
+* Si sigue habiendo más de uno, se usan identificadores de BGP para elegir la ruta
+ 
+ <h3> IP-Anycast </h3>
+ 
+ BGP se usa para implementarlo, se usa comunmente para DNS. Si se quisiera replicar el mismo contendio en muchos servidores distribuidos por el mundo y que cada usuario acceda al que tiene más cerca, la selección de rutas de BGP funcionaría. Se le asigna la misma dirección IP a los servidores y se usa BGP para el *advertising*. Cuando un router reciba varias publicidades para la misma direccion, lo toma como distintas rutas. Cada router localmente usa BGE *route-selection* para elegir el mejor camino, o el servidor más cercano en este caso.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/165157001-251127b2-b9e6-451d-9c3f-cbc9aa52593f.png)
+
+ 
+ <h3> Políticas de routeo </h3>
+ 
+ Cuando se elige una ruta, la política de routeo del AS puede tomar varias cosas en consideración (local preference primero por ej).
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/165157297-1ab2c5a5-8ac1-4400-9d24-ebdcc346bc8d.png)
+
+ X es **multi-homed access ISP** porque se conecta a la red por 2 proveedores ditintos. Cómo evitamos que X forwardee tráfico entre B y C? Controlando cómo se publicitan las rutas BGP. X no le publicitará a B y C las rutas que conoce a Y. De esta manera se lograría lo deseado. 
+ Cualquier tráfico fluyendo a través de la red *backbone* ISPs debe tener un origen o destino en una red que sea cliente de ese ISP. Sino, el tráfico estaría fluyendo gratuitamente por la red ISPs. Entre pares de ISPs se hacen arreglos de *peering*
+ 
+ 
+ Cuando se hace un contrato con una ISP local y se es asignado un prefijo, la ISP usa BGP para informar de la existencia del prefijo a los ISPs con los que se conecta. Estos a su vez usarán BGP de nuevo, etc.
+ 
+ <h2> Plano de control SDN </h2>
  
  </details>
