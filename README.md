@@ -1583,4 +1583,58 @@ Prefijo por ej sería  138.16.68/22. BGP provee a los routers las formas para lo
  
  <h2> Plano de control SDN </h2>
  
+ características de la arquitectura SDN:
+ 
+ * **Flow-based forwarding**: forwarding de paquetes realizado por switches controlados por SDN puede basarse en cualquier cantidad de campos del encabezado en la capa de transporte, red o linkeo.
+ 
+ * **Separación del plano de datos del de control**: el plano de datos consiste en switches de red. El plano de control en servidores y software que determinan y manejan las tablas de flow.
+ 
+ * **Funciones de control de red: externas a switches del plano de datos**: SDN está implementado en software. El plano de control consiste de 2 componentes: el controlador SDN (mantiene la información del estado de la red y se la provee a las aplicaciones) y una serie de aplicaciones de control de red (monitorean y controlan los dispositivos de red. 
+ 
+ * **Red programable**: a través de las aplicaciones corriendo en el plano de control.
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/165159863-8cb5a37a-8be0-4108-bf64-bb7b5d609760.png)
+
+ 
+ <h3> El plano de control de SDP: el controlador y las aplicaciones </h3>
+ 
+ Las funcionalidaded del controlador pueden agruparse en 3 capas:
+ 
+ * ** Capa de comunicación: comunicando entre el controlador SDN y los dispositivos de control de red**: protocolo para intercambiar info
+ * **manager del estado de toda la red**: para tomar decisiones, el controlador debe tener el útlimo estado de red actualizado y disponible.
+ * **La interfaz con la capa de control de red de aplicación**: el controlador intercatua con las aplicaciones de control de red a través de su "límite norte".
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/165161010-2b65c017-5a1c-44be-8476-870e6fbdd406.png)
+
+ El controlador SDN está logicamente centralizado, pero distribuido en varios servidores. Por lo que deben tenerse en cuenta las operaciones internas.
+ 
+ <h3> Protocolo OpenFlow </h3>
+ 
+ opera entre un controlador SDN y un SDN-controlled switch u otro dispositivo que implemente la API de OpenFlow. Entro los mensajes más importantes que fluyen del controlador a los switches controlados esta:
+ 
+ * **Configuración**
+ * **Modify-state**: agregar/eliminar entradas en la tabla y modificar puerto
+ * **Read State**
+ * **Send-Packet**
+ 
+ Entre los mensaje que fluyen del dispositivo controlado al controlador:
+ 
+ * **Flow-removed**: informa que se elimino una entrada
+ * **Port-status**
+ * **Packet-in**: para enviar paquetes que no matchearon y algunos que si lo hicieron.
+ 
+ 
+ <h3> Interaccion entre el plano de control y el de datos: ejemplo </h3>
+ 
+ ![image](https://user-images.githubusercontent.com/71232328/165162471-f01f46aa-25d6-4425-8f84-9564a9cdfb6e.png)
+
+ 
+ 1. *s1* notifica al controlador SDN del cambio de estado del link con *s2* usando **Port-status**.
+ 2. El controlador SDN recibe el mensaje y notifica al *link-state manager*, quien actualiza la base de datos de estados
+ 3. La aplicacion de control de red que implementaba el agoritmo es notificada.
+ 4. La aplicación de routeo LS intercatua con el manager para obtener una actualización del estado de los links. Luego computa los caminos nuevamente
+ 5. La aplicacion luego interactua con el administrador de la tabla de flow, que determina que tablas actualizar
+ 6. El administrador de las tablas usa OpenFlow para actualizar las entradas afectadas: s1,s2 y s4
+ 
+ <h2> ICMP: Internet Control Message Protocol </h3>
  </details>
