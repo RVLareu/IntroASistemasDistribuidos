@@ -27,7 +27,7 @@ Cada bloque se procesa en 4 rondas. Luego de la ultima ronda se aplica el mismo 
 
 4 rondas, cada una de 16 pasos con una constante para cada una y una funcion. Se procesan los bloques de texto plano de 512 bits. En total se usan 64 constantes (T). Entonces cada ronda usará una parte del texto plano, 16 constantes en 16 pasos y una función lógica de estos buffers. Todo esto para el primer bloque, para el segundo será lo mismo pero el vector de inicialización ser el MD obtenido con el bloque de 512 bits previo. El cuadrado con el + es adicion modulo 2 a la 32.
 
-!(diagrama de MD5)[]
+![diagrama de MD5](../diagramas/diagrama_rondas.png)
 
 Ahora vemos cuales son las funciones logicas para cada ronda:
 
