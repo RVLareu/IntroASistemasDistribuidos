@@ -142,7 +142,7 @@ Las diferencias son:
 * Se agregó una cuarta ronda
 * Cada paso ahora tiene una constante aditiva única
 * La función G en la ronda 2 se cambió de `(XY v XZ v YZ)` a `(XZ v Y not(Z))`, haciendo a G menos simetrica
-* Cada paso ahora suma al resultado del paso anterior. Promueve un efecto avalancha más rápida **INVESTIGAR AVALANCHE EFFECT**
+* Cada paso ahora suma al resultado del paso anterior. Promueve un efecto avalancha más rápida (en funciones de hashing es el llamado efecto avalancha, donde un pequeño cambio en la entrada resulte en un cambio enorme en la salida, MD5 logra eso. De esta manera se evitan las correlaciones entre mensajes, haciendo más seguro el proceso)
 * El orden en que las palabras de entrada son accedidas en ronda 2 y 3 son modificados, para hacer estos patrones menos parecidos entre ellos
 * La cantidad de shifts en cada ronda fue optimizada para dar un efecto avalancha más rapido. Los shifts en cada ronda son distintos
 
