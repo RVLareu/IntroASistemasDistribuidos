@@ -185,6 +185,8 @@ $$t_{prop} = t_{propIDA} + t_{propVUELTA}  =  7.11765 \cdot 10^{-5} \; seg + 7.1
 
 $$ t_{prop} + t_{ins} = 1.42353\cdot10^{-4} \; seg + 3.36 \cdot 10^{-3} \; seg = 3.50235 \cdot 10^{-3} \; seg$$
 
+$$ RTT = 3.5 \; ms$$
+
 
 \subsection{Otros}
 
@@ -386,12 +388,200 @@ Tabla final simplificada
         \hline
         \hline
         157.128.2.0/23 &  0\\
+        \hline
         168.123.0.0/23 &  1 \\
+        \hline
         168.12.128.0/18 &  2 \\
     \end{tabular}
 \end{center}
 
+
+
+\section{Control de flujo y congestion}
+
+Cada extremo de la transmisión TCP tiene su propio buffer, alli almacena datos TCP para pasarlos a la capa de aplicación. Si se reciben más datos de los que la capa de aplicación es capaz de consumir, ocurre un \textit{buffer overflow}. Para evitar esto, cada extremo comunica la cantidad de datos que puede recibir. A esto se lo llama \textbf{rwnd} o \textit{Receiver Window}. Va en el campo \textit{Window} del header de TCP.
+Cuando se recibe un cambio en \textbf{rwnd}, el emisor debe modificar la tasa de envío para no provocar un \textit{buffer overflow} ni subutilizar el buffer. 
+Si se recibe $\textbf{rwnd} = 0 $, el emisor debe dejar de enviar datos hasta recibir un nuevo valor de \textbf{rwnd}. Para recibir este nuevo valor, el emisor envía paquetes de 1 byte constantemente y el receptor responde con el tamaño de ventana. Cuando este tamaño ya no es cero, el emisor retoma el envio de datos.
+
+La congestion es producto de múltiples flujos TCP en simultáneo sobre la misma red. Cunado se llena un buffer, se empiezan a descartar los segmentos. En estos casos se dice que la red está congestionada.
+
+\textbf{cwnd} es la máxima cantidad de bytes que puede haber en vuelo.
+$$ LastByteSent-LastByteACKed < min(cwnd,rwnd) $$
+
+
+\subsection{Etapas en el control de congestion}
+
+\begin{itemize}
+    \item Slow Start
+    \item Congestion avoidance
+    \item Fast Retransmit
+    \item Fast Recovery
+\end{itemize}
+
+\subsubsection{Slow Start}
+
+$$cwnd_{n+1} = cwnd_n + MSS \cdot \#ACK $$
+
+con \textbf{cwnd} medido en bytes
+
+
+$$cwnd_{n+1} = cwnd_n + #ACK $$
+
+con \textbf{cwnd} medido en MSSs, es decir segmentos de tamaño máximo. Crece de manera exponencial. \\
+
+\textbf{Ejemplo}
+
+
+
+$$ cwnd_0 = 1 $$
+
+entonces envío 1 segmento, recibo 1 ACK.
+
+Sabiendo que  $$cwnd_{n+1} = cwnd_n + \#ACK $$
+
+entonces
+
+$$ cwnd_1 = cwnd_0 + 1 = 1 + 1 = 2 $$
+
+Envío entonces 2 segmentos, por los cuales recibo 2 ACKs
+
+$$ cwnd_2 = cwnd_1 + \#ACK = 2 + 2 = 4 $$
+
+Para frenar este crecimiento exponencial se cambia de etapa
+
+\subsubsection{Congestion avoidance}
+
+En un momento se da por terminada la etapa de slow start para pasar a la proximo, llamada congestion Avoidance. Esto viene dado por el valor \textbf{sstresh} o \textit{slow start threshold size}.
+
+$$ cwnd_{n+1} = cwnd_n + \frac{\#ACK}{cwnd_n} $$
+
+Aumenta en 1 al llegar los ACKs de la ráfaga, cwnd \textbf{tiene que ser entero, la unidad es el MSS}. Llegado el caso, se redondea para abajo. \\
+
+\textbf{Ejemplo}
+
+$$cwnd_n = 2$$
+
+Entonces se envían 2 segmentos. Llega el primer ACK
+
+$$ cwnd_{n+1} = cwnd_n +  \frac{\#ACK}{cwnd_n} $$
+
+$$ cwnd_{n+1} = 2 +  \frac{1}{2} = 2.5 $$
+
+$$ cwnd_{n+1} = 2 $$
+
+Llega el segundo ACK
+
+$$ cwnd_{n+2} = cwnd_{n+1} +  \frac{\#ACK}{cwnd_{n+1}} $$
+
+$$ cwnd_{n+2} = 2 +  \frac{2}{2} = 3 $$
+
+
+\subsubsection{Pérdida de paquetes}
+
+Pérdida por timeout (\textbf{RTO})
+
+$$ ssthresh = \frac{cwnd_n}{2} $$
+
+$$ cwnd_{n+1} = 1  $$
+
+1 es llamado LW o \textit{Loss Window}
+
+\subsection{Ejercicio de parcial}
+
+En una conexión TCP recién establecida (IW = 2 MSS, SSTHRESH = 64 KB) con RTT=200 ms y MSS=2 KB, el host receptor siempre anuncia una AdvertisedWindow de 16 KB. La red está cargada al punto que si una ráfaga fuera de 16 KB o más, se perderían todos los segmentos de la misma.
+¿Cuántos rounds se demora en enviar un archivo
+de 36 KB?
+
+
+
+$$ RTT = 200 ms $$
+
+$$ MSS = 2 KB$$
+
+$$ IW = 2 MSS $$
+
+$$ SSTHRESH = 64 KB $$
+
+$$ rwnd = 16 KB $$
+
+$$ LimiteDeLaRed = 16 KB $$
+
+$$ fileSize = 36 KB $$
+
+Paso los datos a MSS
+
+$$ IW = 2 MSS $$
+
+$$ SSTHRESH = 32 MSS $$
+
+$$ rwnd = 8 MSS $$
+
+$$ LimiteDeLaRed = 8 MSS $$
+
+$$ fileSize = 18 MSS $$
+
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{resolucion1.png}
+\end{figure}
+
+En una primera instancia se realiza el three way handshake para establecer la conexion TCP. $IW = 2$ entonces $cwnd_n = 2$. Se envían 2 segmentos, se reciben los 2 ACK correspondientes. Como se está en slow start, $$cwnd_{n+1} = cwnd_n + \#ACK $$
+
+De esta manera, $cwnd_{n+1} = 2 + 2 = 4 $ y se envían 4 segmentos. De los cuales se reciben los 4 ACKs
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{resolucion2.png}
+\end{figure}
+
+se sigue en Slow start, por lo que  $cwnd_{n+2} = cwnd_{n+1} + \#ACK = 4 + 4 = 8 $
+
+Se envían entonces los siguientes 8 segmentos, los cuales se pierden ya que $ rwnd = 8 $
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{resolucion3.png}
+\end{figure}
+
+El cliente se informa de esto por un timeout (RTO). Entonces debe actuarse teniendo en cuenta este evento. El valor de la ventana volverá a ser 1, por lo que $ cwnd_{n+3} = 1  $. Además se modifica el threshold de acuerdo a $ ssthresh = \frac{cwnd_n}{2}  = \frac{8}{2} = 4$.
+
+Se retoma entonces el envío de datos, enviando 1 segmento y recibiendo el ACK correspondiente. Se actualiza la ventana con $cwnd_{n+4} = 1 +1 = 2$. Se envian entonces 2 y se reciben 2 ACK. Se llega a que $cwnd_{n+5} = 2 + 2 = 4 $. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{resolucion4.png}
+\end{figure}
+
+Recordemos que por el RTO,  $ ssthresh = 4 $, entonce $cwnd \geq ssthresh $. Entonces \textbf{finaliza Slow start y comienza congestion avoidance}.
+Continuamos enviando 4 segmentos y recibimos los ACK correspondientes.
+Ahora el cálculo de la ventana es distinto
+
+$$ cwnd_{n+1} = cwnd_n + \frac{\#ACK}{cwnd_n} $$
+
+entonces  $cwnd_{n+6} = 4 + \frac{4}{4} = 5 $ y se envían 5 segmentos, de los cuales se reciben los 5 ACKs correspondientes. Ya se enviaron 18 MSS y como $fileName = 18 MSS $ es el fin de la transmisíon. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{resolucion5.png}
+\end{figure}
+
+Lo único que faltaría serian los mensajes correspondientes al cierre, que implica 4 mensajes
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{resolucion6.png}
+\end{figure}
+
+
 \section{Teoría}\label{sec:teoria}
+
+\subsection{Capa de Aplicación}\label{sec:capaaplicacion}
+
+Los protocolos de la capa de aplicación se implementan en los hosts
+
 
 \subsection{Protocolo\label{sec:protocolo}}
 
@@ -401,9 +591,7 @@ Tabla final simplificada
 La función de un protocolo de la capa de aplicación es la de ...
 
 \subsubsection{¿Qué define un protocolo?} 
-
-
-Un protocolo define:
+Conjunto definido de reglas y procedimientos que determinan cómo se transmiten los datos en las redes de computadoras. Un protocolo define:
 
 \begin{itemize}
     \item Mensajes de petición y respuesta
