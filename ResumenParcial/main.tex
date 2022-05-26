@@ -52,12 +52,12 @@
 
 \begin{document}
 \begin{titlepage} % Carátula
-	\hfill\includegraphics[width=6cm]{logofiuba.jpg}
+	\hfill\includegraphics[width=6cm]{imagenes/logofiuba.jpg}
     \centering
     \vfill
-    \Huge \textbf{Ejercicios parcial}
+    \Huge \textbf{Resumen parcial}
     \vskip2cm
-    \Large [?]  Introducción Sistemas Distribuidos\\
+    \Large [75.43]  Introducción Sistemas Distribuidos\\
     Curso Hamelin \\ 
     Primer cuatrimestre de 2022 
     \vfill
@@ -110,7 +110,7 @@ $$t_{prop} = \frac{d}{c}$$
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{ejercicioRtt.png}
+\includegraphics[width=\textwidth]{imagenes/ejercicioRtt.png}
 \end{figure}
 
 
@@ -140,7 +140,7 @@ $$1000 \; bytes = 8000 \; bits$$
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{tiempoInsercion.png}
+\includegraphics[width=\textwidth]{imagenes/tiempoInsercion.png}
 \end{figure}
 
 
@@ -164,7 +164,7 @@ $$ t_{ins} = t_{insIDA} + t_{insVUELTA} =   1.68 \cdot 10^{-3} seg +  1.68 \cdot
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{tiempoPropagacion.png}
+\includegraphics[width=\textwidth]{imagenes/tiempoPropagacion.png}
 \end{figure}
 
 Ida:
@@ -196,7 +196,7 @@ $$ RTT = 3.5 \; ms$$
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{tiempoEncolado.png}
+\includegraphics[width=\textwidth]{imagenes/tiempoEncolado.png}
 \caption{Tiempo de Encolado}
 \end{figure}
 
@@ -210,7 +210,7 @@ Si $L \cdot a > R$, significa que están llegando más paquetes que los que el r
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{tiemposRTT.png}
+\includegraphics[width=\textwidth]{imagenes/tiemposRTT.png}
 \caption{Tiempo de Encolado}
 \end{figure}
 
@@ -406,7 +406,7 @@ Si se recibe $\textbf{rwnd} = 0 $, el emisor debe dejar de enviar datos hasta re
 La congestion es producto de múltiples flujos TCP en simultáneo sobre la misma red. Cunado se llena un buffer, se empiezan a descartar los segmentos. En estos casos se dice que la red está congestionada.
 
 \textbf{cwnd} es la máxima cantidad de bytes que puede haber en vuelo.
-$$ LastByteSent-LastByteACKed < min(cwnd,rwnd) $$
+$$ \mathrm{LastByteSent}-\mathrm{LastByteACKed} < \mathrm{min}(\mathrm{cwnd},\mathrm{rwnd}) $$
 
 
 \subsection{Etapas en el control de congestion}
@@ -420,12 +420,12 @@ $$ LastByteSent-LastByteACKed < min(cwnd,rwnd) $$
 
 \subsubsection{Slow Start}
 
-$$cwnd_{n+1} = cwnd_n + MSS \cdot \#ACK $$
+$$\mathrm{cwnd}_{n+1} = \mathrm{cwnd_n} + \mathrm{MSS} \cdot \#\mathrm{ACK} $$
 
 con \textbf{cwnd} medido en bytes
 
 
-$$cwnd_{n+1} = cwnd_n + #ACK $$
+$$\mathrm{cwnd}_{n+1} = \mathrm{cwnd}_n + \#ACK $$
 
 con \textbf{cwnd} medido en MSSs, es decir segmentos de tamaño máximo. Crece de manera exponencial. \\
 
@@ -433,19 +433,15 @@ con \textbf{cwnd} medido en MSSs, es decir segmentos de tamaño máximo. Crece d
 
 
 
-$$ cwnd_0 = 1 $$
+$$ \mathrm{cwnd}_0 = 1 $$
 
-entonces envío 1 segmento, recibo 1 ACK.
+entonces envío 1 segmento, recibo 1 ACK. Luego 
 
-Sabiendo que  $$cwnd_{n+1} = cwnd_n + \#ACK $$
-
-entonces
-
-$$ cwnd_1 = cwnd_0 + 1 = 1 + 1 = 2 $$
+$$ \mathrm{cwnd}_1 = \mathrm{cwnd}_0 + 1 = 1 + 1 = 2 $$
 
 Envío entonces 2 segmentos, por los cuales recibo 2 ACKs
 
-$$ cwnd_2 = cwnd_1 + \#ACK = 2 + 2 = 4 $$
+$$ \mathrm{cwnd}_2 = \mathrm{cwnd}_1 + \#ACK = 2 + 2 = 4 $$
 
 Para frenar este crecimiento exponencial se cambia de etapa
 
@@ -453,130 +449,205 @@ Para frenar este crecimiento exponencial se cambia de etapa
 
 En un momento se da por terminada la etapa de slow start para pasar a la proximo, llamada congestion Avoidance. Esto viene dado por el valor \textbf{sstresh} o \textit{slow start threshold size}.
 
-$$ cwnd_{n+1} = cwnd_n + \frac{\#ACK}{cwnd_n} $$
+$$ \mathrm{cwnd}_{n+1} = \mathrm{cwnd}_n + \frac{\#ACK}{\mathrm{cwnd}_n} $$
 
 Aumenta en 1 al llegar los ACKs de la ráfaga, cwnd \textbf{tiene que ser entero, la unidad es el MSS}. Llegado el caso, se redondea para abajo. \\
 
 \textbf{Ejemplo}
 
-$$cwnd_n = 2$$
+$$\mathrm{cwnd}_n = 2$$
 
 Entonces se envían 2 segmentos. Llega el primer ACK
 
-$$ cwnd_{n+1} = cwnd_n +  \frac{\#ACK}{cwnd_n} $$
+$$ \mathrm{cwnd}_{n+1} = \mathrm{cwnd}_n +  \frac{\#ACK}{\mathrm{cwnd}_n} $$
 
-$$ cwnd_{n+1} = 2 +  \frac{1}{2} = 2.5 $$
+$$ \mathrm{cwnd}_{n+1} = 2 +  \frac{1}{2} = 2.5 $$
 
-$$ cwnd_{n+1} = 2 $$
+$$ \mathrm{cwnd}_{n+1} = 2 $$
 
 Llega el segundo ACK
 
-$$ cwnd_{n+2} = cwnd_{n+1} +  \frac{\#ACK}{cwnd_{n+1}} $$
+$$ \mathrm{cwnd}_{n+2} = \mathrm{cwnd}_{n+1} +  \frac{\#ACK}{\mathrm{cwnd}_{n+1}} $$
 
-$$ cwnd_{n+2} = 2 +  \frac{2}{2} = 3 $$
+$$ \mathrm{cwnd}_{n+2} = 2 +  \frac{2}{2} = 3 $$
 
 
 \subsubsection{Pérdida de paquetes}
 
 Pérdida por timeout (\textbf{RTO})
 
-$$ ssthresh = \frac{cwnd_n}{2} $$
+$$ \mathrm{ssthresh} = \frac{\mathrm{cwnd}_n}{2} $$
 
-$$ cwnd_{n+1} = 1  $$
+$$ \mathrm{cwnd}_{n+1} = 1  $$
 
 1 es llamado LW o \textit{Loss Window}
 
 \subsection{Ejercicio de parcial}
 
-En una conexión TCP recién establecida (IW = 2 MSS, SSTHRESH = 64 KB) con RTT=200 ms y MSS=2 KB, el host receptor siempre anuncia una AdvertisedWindow de 16 KB. La red está cargada al punto que si una ráfaga fuera de 16 KB o más, se perderían todos los segmentos de la misma.
-¿Cuántos rounds se demora en enviar un archivo
-de 36 KB?
+
+\input{ejercicioParcialTcp}
+
+\subsection{Pérdida de un solo paquete}
+
+Suponemos se está usando el algoritmo de control de congestion de Tahoe. 
+Recibib ACK duplicados indica que llegan algunos paquetes de la rafaga. Ocurre cuando se reciben 4 ACKs para el mismo segmento (el primer ACK es válido, luego llegan 3 ACKs duplicados). Dependiendo del algoritmo implementado se vuelve a slow start o se realiza un fast recovery
+
+\subsubsection{Tahoe}
+
+Tahoe se comporto frente a los ACKs duplicados de igual manera que lo hace frente a un RTO. Es decir, realiza un \textbf{Fast Retransmit} y luego un \textbf{Slow start} \\
+
+\textbf{Ejemplo}\\
+
+Veamos que ocurre cuando se pierde un paquete de una ráfaga con el algoritmo de Tahoe. El inicio de la comunicación es identico al caso anterior
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagenes/resolucion2.png}
+\end{figure}
+
+En primer lugar el three Way Handshake, y los envios de paquetes van creciendo exponencialmente ya que nos encontramos en slow start. Luego de recibidos los ACK para los paquetes 3,4,5 y 6 el valor de la ventana es $\mathrm{cwnd}_n = 8$ y $\mathrm{ssthresh}  = 32$
+
+En la siguiente ráfaga el paquete 8 no llega a destino, es decir llegan 7 paquetes al servidor. Por lo que este contesta con 7 ACK pero asociados al último paquete previo al que no llegó, es decir el paquete 7.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagenes/paqEnRafaga.png}
+\end{figure}
 
 
-
-$$ RTT = 200 ms $$
-
-$$ MSS = 2 KB$$
-
-$$ IW = 2 MSS $$
-
-$$ SSTHRESH = 64 KB $$
-
-$$ rwnd = 16 KB $$
-
-$$ LimiteDeLaRed = 16 KB $$
-
-$$ fileSize = 36 KB $$
-
-Paso los datos a MSS
-
-$$ IW = 2 MSS $$
-
-$$ SSTHRESH = 32 MSS $$
-
-$$ rwnd = 8 MSS $$
-
-$$ LimiteDeLaRed = 8 MSS $$
-
-$$ fileSize = 18 MSS $$
-
+Al realizar esto el servidor, lo que está haciendo es un NACK implícito. Se ingresa entonces en \textbf{Fast Retransmit}, donde se envía el paquete extraviado y se recibe un ACK correspondiente al último paquete que se recibió correctamente de la ráfaga previa (el 14).
 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{resolucion1.png}
+\includegraphics[width=\textwidth]{imagenes/fastRetransmit.png}
 \end{figure}
 
-En una primera instancia se realiza el three way handshake para establecer la conexion TCP. $IW = 2$ entonces $cwnd_n = 2$. Se envían 2 segmentos, se reciben los 2 ACK correspondientes. Como se está en slow start, $$cwnd_{n+1} = cwnd_n + \#ACK $$
+Posterior a esto se vuelve a Slow Start, y Tahoe se comportaba de igual manera que en un RTO, por lo que $\mathrm{cwnd}_n = 1$ y $\mathrm{ssthresh} = \frac{\mathrm{cwnd}_{n-1}}{2} = \frac{8}{2} = 4 $. Entonces se envía un paquete y se recibe el ACK correspondiente. Luego se envían 2 y se reciben sus ACKs, etc
 
-De esta manera, $cwnd_{n+1} = 2 + 2 = 4 $ y se envían 4 segmentos. De los cuales se reciben los 4 ACKs
+
+\subsubsection{Reno}
+
+El algoritmo de Reno actúa distinto a Tahoe. Cuando se reciben 4 ACKs iguales, se retransmite el siguiente segmento. Además luego los valores son $ \mathrm{cwnd}_{n+1} = \frac{\mathrm{cwnd}_{n}}{2} $ y $ \mathrm{ssthresh} = \frac{\mathrm{cwnd}_{n}}{2} $. Luego de esto, se continúa en congestion Avoidance. Esto se llama \textbf{Fast Recovery} \\
+
+\textbf{Ejemplo} \\
+
+Identico al anterior hasta perder el 8vo paquete de la ráfaga. Se hace un fast retransmit del paquete perdido y se actualizan los valores de ventana y threshold. $\mathrm{cwnd}_n = 8 $ y $\mathrm{ssthresh} = 32$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagenes/fastRetransmit.png}
+\end{figure}
+
+Luego de reenviar el paquete perdido en fast retransmit,  $\mathrm{cwnd}_{n+1} = \frac{\mathrm{cwnd}_{n}}{2} = \frac{8}{2} = 4 $ y $\mathrm{ssthresh} = 4 $. A continuación se entra en congestion avoidance.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagenes/postCongA.png}
+\end{figure}
+
+\subsubsection{Cheatsheet}
+
+\textbf{En Slow Start}
+
+$$ \mathrm{cwnd}_{n+1} = \mathrm{cwnd}_{n} + \#\mathrm{ACK} $$
+
+\textbf{Ocurre RTO}
+
+$$ \mathrm{ssthresh} = \frac{\mathrm{cwnd}_n}{2} $$
+
+$$ \mathrm{cwnd}_{n+1} = 1  $$
+
+\textbf{Congestion Avoidance, $\mathrm{cwnd} \geq \mathrm{ssthresh} $}
+
+$$ \mathrm{cwnd}_{n+1} = \mathrm{cwnd}_n + \frac{\#\mathrm{ACK}}{\mathrm{cwnd}_n} $$
+
+
+\subsection{Ejercicios de Parcial}
+
+\subsubsection{Ejercicio 1}
+
+Un usuario descarga un recurso de 30960 bytes de un servidor por medio de un HTTP GET. Se sabe que el sistema operativo del usuario opera con TCP Tahoe y cuya IW=4MSS. El sistema utiliza un ssthresh=11520 bytes. Considerando: 1MSS = 1440 bytes
+La conexión sufrirá la pérdida del séptimo segmento de datos transmitido \\
+
+Se que $ 1 \; \mathrm{MSS} = 1440 \; \mathrm{bytes} $ entonces se pasa todo a MSS. Para el recurso de $ 30960 \; \mathrm{bytes} $, $ \frac{30960 \; \mathrm{bytes} }{1440 \; \mathrm{bytes}} = 21.5 \; \mathrm{MSS}$. Como es el tamaño del archivo, para descargarlo por completo redondeo hacia arriba, entonces $ \mathrm{Recurso} = 22 \; \mathrm{MSS} $. Los mismo para $\mathrm{ssthresh}= 11520 \;\mathrm{bytes}$, entonces $\mathrm{ssthresh}= 8$. 
+Como $\mathrm{IW} = 4 \; \mathrm{MSS}$ se comienza con $ \mathrm{cwnd}_n = 4$.
+
+
+
+Primero el three way handshake para establecer la conexion TCP. Luego enviamos los primeros 4 paquetes y recibimos los 4 ACKs.
 
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{resolucion2.png}
+\includegraphics[width=\textwidth]{imagenes/resEj11.png}
 \end{figure}
 
-se sigue en Slow start, por lo que  $cwnd_{n+2} = cwnd_{n+1} + \#ACK = 4 + 4 = 8 $
-
-Se envían entonces los siguientes 8 segmentos, los cuales se pierden ya que $ rwnd = 8 $
+$ \mathrm{cwnd}_{n+1} = \mathrm{cwnd}_{n} + \#\mathrm{ACK} = 4 + 4 = 8 $. Se procede a enviar los siguientes 8 segmentos. Pero por consigna el 7mo no llega a destino. Por lo que se hace fast retransmit del segmento que no llega.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{resolucion3.png}
+\includegraphics[width=\textwidth]{imagenes/resEj12.png}
 \end{figure}
 
-El cliente se informa de esto por un timeout (RTO). Entonces debe actuarse teniendo en cuenta este evento. El valor de la ventana volverá a ser 1, por lo que $ cwnd_{n+3} = 1  $. Además se modifica el threshold de acuerdo a $ ssthresh = \frac{cwnd_n}{2}  = \frac{8}{2} = 4$.
+Como el algoritmo es Tahoe, posterior al Fast Retransmit, se vuelve a slow Start se tendrá $ \mathrm{cwnd}_{n+2} = 1 $ y   $\mathrm{ssthresh}= 4 $.
 
-Se retoma entonces el envío de datos, enviando 1 segmento y recibiendo el ACK correspondiente. Se actualiza la ventana con $cwnd_{n+4} = 1 +1 = 2$. Se envian entonces 2 y se reciben 2 ACK. Se llega a que $cwnd_{n+5} = 2 + 2 = 4 $. 
+Se envía entonces un segmento, se recibe su ACK correspondiente. Por estar en Slow Start ahora  $ \mathrm{cwnd}_{n+3} = 2 $. Se envian 2 paquetes y se reciben los 2 ACKs. Ahora $ \mathrm{cwnd}_{n+4} = 4 $. Recordando que   $\mathrm{ssthresh}= 4 $, se envían 4 paquetes y se reciben los 4 ACK, pero ahora se actualiza distinto la ventana por haber entrado en Congestion Avoidance. $ \mathrm{cwnd}_{n+5} = \mathrm{cwnd}_{n+4} + \frac{\#\mathrm{ACK}}{\mathrm{cwnd}_{n+4}} = 4 + \frac{4}{4} = 5 $. 
+
+Sin embargo, con enviar 3 paquetes más se completa la descarga del archivo. Se finaliza terminando la conexión.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{resolucion4.png}
+\includegraphics[width=\textwidth]{imagenes/resEj13.png}
 \end{figure}
 
-Recordemos que por el RTO,  $ ssthresh = 4 $, entonce $cwnd \geq ssthresh $. Entonces \textbf{finaliza Slow start y comienza congestion avoidance}.
-Continuamos enviando 4 segmentos y recibimos los ACK correspondientes.
-Ahora el cálculo de la ventana es distinto
+\subsubsection{Ejercicio 2}
+Por medio de una conexión TCP se transfiere desde un host A a un host B un archivo de 27326 B. De acuerdo con las tecnologías de enlace que utiliza el host A, MSS=1500B. Además, sabemos que su sistema operativo opera con TCP Tahoe, con una IW=1MSS. El sistema utiliza ssthresh=4MSS. Sabemos que la conexión sufrirá la pérdida del séptimo segmento de datos transmitido.
 
-$$ cwnd_{n+1} = cwnd_n + \frac{\#ACK}{cwnd_n} $$
+\subsubsection{Ejercicio 3}
 
-entonces  $cwnd_{n+6} = 4 + \frac{4}{4} = 5 $ y se envían 5 segmentos, de los cuales se reciben los 5 ACKs correspondientes. Ya se enviaron 18 MSS y como $fileName = 18 MSS $ es el fin de la transmisíon. 
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{resolucion5.png}
-\end{figure}
-
-Lo único que faltaría serian los mensajes correspondientes al cierre, que implica 4 mensajes
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{resolucion6.png}
-\end{figure}
+Considere el efecto de usar Slow Start en una conexión TCP recién establecida (IW = 2 * SMSS, SSTHRESH = 64KB), que tiene un RTT de 10 mseg y sin congestión ni errores presentes en la red. La RWND es de 24KB y el SMSS es de 2KB. ¿Cuánto tiempo transcurre antes de que pueda ser enviada la primera ventana de recepción llena? (Asumir que el Ttx de una ventana es una componente despreciable del Delay total de la conexión)
 
 
-\section{Teoría}\label{sec:teoria}
+\begin{center}
+    \begin{tabular}{c|c|c|c}
+        RTT & CWND & RWND & FlightSize \\
+        \hline
+        \hline
+        1 & & & \\
+         \hline
+        2 & & & \\
+         \hline
+        3 & & & \\
+         \hline
+        4 & & & \\
+         \hline
+        5 & & & \\
+         \hline
+        6 & & & \\
+         \hline
+        7 & & & \\
+         \hline
+        8 & & & \\
+         \hline
+        9 & & & \\
+         \hline
+        10 & & & \\
+    \end{tabular}
+\end{center}
+
+
+\subsubsection{Ejercicio 4 - Reno}
+
+Por medio de una conexión TCP se transfiere desde un host A a un host B un archivo de 41326 B. De acuerdo con las tecnologías de enlace que utiliza el host A, MSS=2000B. Además, sabemos que su sistema operativo opera con TCP Reno, con una IW=2MSS. El sistema utiliza ssthresh=8MSS. Sabemos que la conexión sufrirá la pérdida del décimo segmento de datos transmitido.
+
+\section{Fragmentacion}\label{sec:fragmentacion}
+
+\input{Fragmentacion}
+
+\section{Subnetting}\label{sec:subnetting}
+
+\section{Teoria}\label{sec:teoria}
 
 \subsection{Capa de Aplicación}\label{sec:capaaplicacion}
 
@@ -599,6 +670,5 @@ Conjunto definido de reglas y procedimientos que determinan cómo se transmiten 
     \item Campos - función, tamaño y delimitadores
     \item Procedimiento de envío de mensajes y sus respuestas
 \end{itemize}
-
 
 \end{document}
