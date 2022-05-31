@@ -1,0 +1,66 @@
+
+\subsection{TCP}
+
+\begin{lstlisting}[caption= Cliente TCP]
+from socket import *
+serverName = "servername"
+serverPort = 12000
+clientSocket = socket(AF_INET, SOCK_STREAM)
+clientSocket.connect((serverName, serverPort))
+sentence = raw_input("Input lowercase sentence:")
+clientSocket.send(sentence.encode())
+modifiedSentence = clientSocket.recv(1024)
+print("From Server: ", modifiedSentence.decode())
+clientSocket.close()
+
+\end{lstlisting}
+
+Se crea el cliente, \textbf{AF\_INET} indica que la red usará IPv4, el segundo parámetro indica que es TCP socket. El SO define el puerto a usar. Con el método \textbf{connect} se inicia la conexion entre el cliente y el servidor, pasando por parámetro la direccion y puerto del servidor. Luego de esta línea, ya se estableció el three way handshake. Con la funcion send, el cliente pone la tira de bytes en la conexion TCP y luego espera la respuesta. Finalmente se corta la conexión TCP
+
+
+\begin{lstlisting}[caption= Servidor TCP]
+from socket import *
+serverPort = 12000
+serverSocket = socket(AF_INET, SOCK_STREAM)
+serverSocket.bind(("", serverPort))
+serverSocket.listen(1)
+print("The server is ready to receive")
+while True:
+    connectionSocket, addr = serverSocket.accept()
+    sentence = connectionSocket.recv(1024).decode()
+    capitalizedSentence = sentence.upper()
+    connectionSocket.send(capitalizedSentence.encode())
+    connectionSocket.close()
+\end{lstlisting}
+
+Se crea el socket y se asocia el puerto con el socket recientemente creado (bind). Este será el socket de bienvenida, el cual queda a la escucha de nuevos clientes (listen). El parámetro indica la máxima cantidad de conexiones encoladas. Cuando llega un cliente, invoca el método accept, el cual crea un nuevo socket dedicado a ese cliente en particular. Se realiza el handshake y se establece la conexion. A partir de ahora pueden enviarse bytes sobre la conexion establecida. Finalmente se cierra la conexion, pero serverSocket sigue abierto, a la espera de nuevos clientes
+
+\subsection{UDP}
+
+\begin{lstlisting}[caption = Cliente UDP]
+from socket import *
+serverName = "hostname"
+serverPort = 12000
+clientSocket = socket(AF_INET, SOCK_DGRAM)
+message = raw_input("Input lowercase sentence:")
+clientSocket.sendto(message.encode(),(serverName, serverPort))
+modifiedMessage, serverAddress = clientSocket.recvfrom(2048)
+print(modifiedMessage.decode())
+clientSocket.close()
+\end{lstlisting}
+
+El parámetro \textbf{SOCK\_DGRAM} indica que será un socket UDP. Con el método \textit{sendto} se envía el mensaje (en tipo bytes) indicando la direccion y puerto del servidor. Luego espera la respuesta del servidor. Puede extraerse la dirección del servidor al recibir el mensaje.
+
+\begin{lstlisting}[caption = Servidor UDP]
+from socket import *
+serverPort = 12000
+serverSocket = socket(AF_INET, SOCK_DGRAM)
+serverSocket.bind(("", serverPort))
+print(” The server is ready to receive...”)
+while True:
+    message, clientAddress = serverSocket.recvfrom(2048)
+    modifiedMessage = message.decode().upper()
+    serverSocket.sendto(modifiedMessage.encode(), clientAddress)
+\end{lstlisting}
+
+Se asigna el puerto al socket con \textit{bind}. Cuando cualquiera envie un paquete a la direccion Ip y a ese puerto, llegará al socket. El loop permite recibir y procesar paquetes de varios clientes indefinidamente. Allí espera el arrivo de paquetes. La variable \textit{clientAddress} contiene la direccion IP del cliente y el puerto. En \textit{sendto} se especifica la direccion del cliente destino (dirección y puerto)
