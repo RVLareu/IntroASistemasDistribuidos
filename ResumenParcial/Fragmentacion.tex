@@ -72,6 +72,7 @@ $$\mathrm{Fragmento}_2 = 272 B$$
 
 \subsection{Ejercicio de Parcial}
 
+\subsubsection{Ejercicio 1}
 El host A quiere enviar un paquete de tamaño total 620 bytes al host B. El valor del flag Do not fragment es cero.
 
 \begin{figure}[H]
@@ -189,4 +190,86 @@ Recordar de que el payload del fragmento 1 es de 480. Entonces se enviarán dos 
 \end{center}
 
 La suma de los payloads, da un payload total de 600 que es el payload que se tenia originalmente (más 20 de header)
+
+\subsubsection{Ejercicio 2}
+
+
+El host A envia un datagrama IP cuyo payload es 1480 Bytes.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagenes/enunciadoFragmentacion.png}
+\end{figure}
+
+
+El paquete es de 1500 bytes (1480 + 20 del header). En el primer traspaso, alcanza el MTU.
+
+$$ \mathrm{MaxPayloadSize} = MTU - \mathrm{Lenght}(\mathrm{Header}) = 1500 - 20 = 1480 $$
+$$\mathrm{floor}(\frac{\mathrm{1480 B}}{8}) \cdot 8 = 185 B$$
+
+No es necesario fragmentar en este primer tramo.
+
+En el tramo del primer al segundo router hay que fragmentar, ya que el MTU es menor al tamaño del paquete. Se calcula el máximo payload para este tramo:
+
+$$ \mathrm{MaxPayloadSize} = MTU - \mathrm{Lenght}(\mathrm{Header}) = 532 - 20 = 502 $$
+
+$$\mathrm{floor}(\frac{\mathrm{502 B}}{8}) \cdot 8 = 496 B$$
+
+\begin{center}
+    \begin{tabular}{c|c|c|c}
+        Fragmento & Total Lenght & Fragment Offset & More Fragments \\
+        \hline
+        \hline
+        $ \mathrm{Fragmento}_1 $ & 496 + 20  & 0 & 1\\
+        $ \mathrm{Fragmento}_2 $ &  496 + 20 & 62 & 1\\
+        $ \mathrm{Fragmento}_3 $ & 488 + 20 & 124 & 0\\
+    \end{tabular}
+\end{center}
+
+Para el tramo del segunto router al Host B habrá que fragmentar todos ya que el MTU es más chico.
+
+$$ \mathrm{MaxPayloadSize} = MTU - \mathrm{Lenght}(\mathrm{Header}) = 186 - 20 = 166 $$
+
+$$\mathrm{floor}(\frac{\mathrm{166 B}}{8}) \cdot 8 = 160 B$$
+
+
+
+\begin{center}
+    \begin{tabular}{c|c|c|c}
+        Fragmento & Total Lenght & Fragment Offset & More Fragments \\
+        \hline
+        \hline
+        $ \mathrm{Fragmento}_{11} $ & 160 + 20  & 0 & 1\\
+        \hline
+        $ \mathrm{Fragmento}_{12} $ & 160 + 20  & 20 & 1\\
+        \hline
+        $ \mathrm{Fragmento}_{13} $ & 160 + 20  & 40 & 1\\
+        \hline
+        $ \mathrm{Fragmento}_{14} $ & 16 + 20  & 60 & 1\\
+        \hline
+        \hline
+        \hline
+        $ \mathrm{Fragmento}_{21} $ & 160 + 20  & 62 & 1\\
+        \hline
+        $ \mathrm{Fragmento}_{22} $ & 160 + 20  & 82 & 1\\
+        \hline
+        $ \mathrm{Fragmento}_{23} $ & 160 + 20  & 102 & 1\\
+        \hline
+        $ \mathrm{Fragmento}_{24} $ & 16 + 20  & 122 & 1\\
+        \hline
+        \hline
+        \hline
+        $ \mathrm{Fragmento}_{31} $ & 160 + 20  & 124 & 1\\
+        \hline
+        $ \mathrm{Fragmento}_{32} $ & 160 + 20  & 144 & 1\\
+        \hline
+        $ \mathrm{Fragmento}_{33} $ & 160 + 20  & 164 & 1\\
+        \hline
+        $ \mathrm{Fragmento}_{34} $ & 8 + 20  & 184 & 0\\
+    \end{tabular}
+\end{center}
+
+Se puede verificar ya que el fragment offset total de la segunda tabla es $124 + \frac{488}{8} = 185$ y el fragment offset total de la última tabla es $184 + \frac{8}{8} = 185$. 
+Además si se suman los payloads se llega a un total de 1480, igual al payload del mensaje original.
+
 

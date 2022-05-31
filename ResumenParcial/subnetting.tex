@@ -30,7 +30,7 @@ $$ \mathrm{\# de hosts} = 2^{32-\mathrm{mascara}}-2 $$
 
 El último 2 restando se debe a que las direcciones de red y broadcast no se pueden usar
 
-\subsection{Ejercicio 1}
+\subsubsection{Ejercicio 1}
 
 \begin{figure}[H]
 \centering
@@ -148,7 +148,7 @@ Se procede de igual manera con las redes que siguen en cantidad de hosts
 \end{figure}
 
 
-\subsection{Ejercicio 2}
+\subsubsection{Ejercicio 2}
 
 Dada la siguiente configuración de hosts y routers, y el espacio 192.168.0.0/23, se pide separar en subredes minimizando la cantidad de IPs sin usar. Ante igualdad de condiciones para ubicar varias subredes:
 \begin{itemize}
@@ -162,3 +162,55 @@ Este criterio arbitrario define una única resolución posible de la configuraci
 \centering
 \includegraphics[width=\textwidth]{imagenes/subnetting2.png}
 \end{figure}
+
+
+El espacio es 192.168.0.0/23 entonces para los hosts se tienen 9 bits, es decir un rango de 512 direcciones: de 0 (0.0) a 511 (0.255).
+
+\begin{center}
+     \begin{tabular}{c|c|c|c}
+          0-7 & 8-15 & 16-23 & 24-31 \\
+          \hline
+          192 & 168 & 0000000 \textbf{0} & \textbf{00000000}
+     \end{tabular}
+\end{center}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{imagenes/subnettingTorta.png}
+\end{figure}
+
+
+La subnet con más hosts es la A con 80. Hay que tener en cuenta que tiene un router, una direccion de red y una de broadcast, necesitando en total 83 direcciones. Puedo dividir hasta una sección de 128 direcciones. Entonces el espacio para A será  192.168.0.0/25 (25 porque arrancaba con una mascara de 23 y se dividió 2 veces el espacio original).\\
+El que sigue en cantidad de hosts es E con 60, ademas de los 2 routers y las 2 direcciones a reservar da un total de 64. Puede subdividirse una sección de 128 direcciones a una sección de 64 direcciones. La máscara será de 26 y el espacio será desde 192.168.0.128.\\
+En tamaño sigue la subnet C con 29, suado a 2 routers y las 2 direcciones da 33. Se debe usar una seccion de 64. La máscara quedará de 26 y el espacio irá desde 192.168.0.192.\\
+Sigue F con 20 hosts, un router y dos direcciones reservadas por un total de 23 direcciones, entonces la máscara queda de 27 y el espacio irá desde 192.168.1.0. Se usa un bloque de 32.\\
+Sigue D con 12 hosts, 1 router y dos direcciones por un total de 15, se puede dividir una seccion de 32 a una de 16. La máscara quedará entonces de 28 y el espacio irá desde 192.168.1.32.\\
+Sigue B con 8, 1 router y 2 direcciones por un total de 11. Entonces se usa un bloque de 16. La máscara queda entonces de 28 y el espacio irá desde 192.168.1.48.\\
+Cada router tiene 2 routers y 2 direcciones, por lo que se asignan bloques de 4, con máscaras de 30\\
+
+
+\begin{center}
+    \begin{tabular}{c|c|c|c|c}
+        Subnet & \#Host & \#Router & Block & Prefix/Mask \\
+        \hline
+        \hline
+        A & 80 & 1 & 128 & 192.168.0.0/25\\
+        \hline
+        B &  8 & 1 & 16 & 192.168.1.48/28\\
+        \hline
+        C &  29 & 2 & 64 &  192.168.0.192/26\\
+        \hline
+        D &  12 & 1 & 16 & 192.168.1.32/28 \\
+        \hline
+        E &  60 & 1 & 64 & 192.168.0.128/26 \\
+        \hline
+        F &  20 & 1 & 32 & 192.168.1.0/27 \\
+        \hline
+        G &  0 & 2 & 4 & 192.168.1.64/30  \\
+        \hline
+        H &  0 & 2 & 4 & 192.168.1.68/30  \\
+        \hline
+        I &  0 & 2 & 4 & 192.168.1.72/30 \\
+        
+    \end{tabular}
+\end{center}

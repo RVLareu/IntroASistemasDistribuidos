@@ -215,7 +215,36 @@ Si $L \cdot a > R$, significa que están llegando más paquetes que los que el r
 \caption{Tiempo de Encolado}
 \end{figure}
 
-\section{Agregación de prefijos}\label{sec:agrprefijos}
+
+\subsection{Ejercicios Parcial}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{imagenes/ej1Latencia.png}
+\caption{Tiempo de Encolado}
+\end{figure}
+
+
+$$ Li_{prop} = \frac{\mathrm{distancia}_{Li}}{\mathrm{velocidadDePropagacion}_{Li}}$$
+$$ Li_{ins} = \frac{\mathrm{largoPaq}_{Li}}{\mathrm{velocidadDeSerializacion}_{Li}}$$
+
+$$1000 \mathrm{bytes} = 8000 \mathrm{bits}$$
+
+
+$$ \mathrm{Ruta}_{AB} = L1_{prop} + L1_{ins} + L2_{prop} + L2_{ins} + L5_{prop} + L5_{ins} + L8_{prop} + L8_{ins}$$
+$$ \mathrm{Ruta}_{AB} = \frac{0,1 \mathrm{km}}{1.7\cdot10^{5}\frac{km}{s}} + \frac{8000 \mathrm{bits}}{10\cdot10^6 \frac{\mathrm{bits}}{\mathrm{seg}}} + \frac{10 \mathrm{km}}{2\cdot10^{5}\frac{km}{s}} + \frac{8000 \mathrm{bits}}{200\cdot10^6 \frac{\mathrm{bits}}{\mathrm{seg}}} + \frac{2 \mathrm{km}}{2\cdot10^{5}\frac{km}{s}} + \frac{8000 \mathrm{bits}}{100\cdot10^6 \frac{\mathrm{bits}}{\mathrm{seg}}}  +\frac{0.05 \mathrm{km}}{1.7\cdot10^{5}\frac{km}{s}} + \frac{8000 \mathrm{bits}}{10\cdot10^6 \frac{\mathrm{bits}}{\mathrm{seg}}}$$
+
+$$ \mathrm{Ruta}_{AB} = 1.78088 \cdot 10^{-3} \mathrm{seg} $$
+
+$$ \mathrm{Ruta}_{BA} = L8_{prop} + L8_{ins} + L7_{prop} + L7_{ins} + L4_{prop} + L4_{ins} + L1_{prop} + L1_{ins}$$
+
+$$ \mathrm{Ruta}_{AB} = \frac{0,05 \mathrm{km}}{1.7\cdot10^{5}\frac{km}{s}} + \frac{8000 \mathrm{bits}}{10\cdot10^6 \frac{\mathrm{bits}}{\mathrm{seg}}} + \frac{6 \mathrm{km}}{50\cdot10^{5}\frac{km}{s}} + \frac{8000 \mathrm{bits}}{100\cdot10^6 \frac{\mathrm{bits}}{\mathrm{seg}}} + \frac{6 \mathrm{km}}{1.7\cdot10^{5}\frac{km}{s}} + \frac{8000 \mathrm{bits}}{100\cdot10^6 \frac{\mathrm{bits}}{\mathrm{seg}}}  +\frac{0.1 \mathrm{km}}{1.7\cdot10^{5}\frac{km}{s}} + \frac{8000 \mathrm{bits}}{10\cdot10^6 \frac{\mathrm{bits}}{\mathrm{seg}}}$$
+
+$$ \mathrm{Ruta}_{AB} = 1.79738 \cdot 10^{-3} \mathrm{seg}$$
+
+$$ \mathrm{Ruta}_{AB} + \mathrm{Ruta}_{BA} = 1.78088 \cdot 10^{-3} \mathrm{seg} + 1.79738 \cdot 10^{-3} \mathrm{seg} = 3.57826 \cdot 10^{-3} \mathrm{seg} = 3.5786 \; \mathrm{ms} $$
+
+\section{Agregación de prefijos - Ruteo}\label{sec:agrprefijos}
 
 Permite reducir la cantidad de entradas en la tabla de ruteo. Puede realizarse cuando \textbf{las redes son contiguas} y cuando tienen \textbf{idéntico Next Hop o puerto de salida}. Se dice que dos redes son contiguas cuando tienen \textbf{prefijos de igual longitud} y \textbf{la máscara sólo difiere en el último bit}
 
@@ -306,8 +335,9 @@ No difieren únicamente en el último bit, por lo que no cumplen con ser contigu
 Si bien son contiguas, al no compartir el next hop, no se puede realizar agregación de prefijos
 
 
-\subsection{Ejercicio de parcial}
+\subsection{Ejercicios de parcial}
 
+\subsubsection{Ejercicio 1}
 Simplificar la siguiente tabla
 
 \begin{center}
@@ -396,9 +426,141 @@ Tabla final simplificada
     \end{tabular}
 \end{center}
 
+\subsubsection{Ejercicio 2}
+
+A partir de la tabla de ruteo que se muestra a continuación, genere una tabla de ruteo la cual tenga la máxima agregación posible
+
+\begin{center}
+    \begin{tabular}{c|c}
+        Prefijo & Interfaz de salida  \\
+        \hline
+        \hline
+        157.92.64.0/19 & 2\\ 
+        \hline
+        157.92.60.0/22 & 1\\ 
+        \hline
+        157.92.56.0/22 & 1\\ 
+        \hline
+        157.92.25.0/24 & 3\\ 
+        \hline
+        157.92.96.0/19 & 2\\ 
+        \hline
+        157.92.52.0/22 & 0\\ 
+        \hline
+        157.92.48.0/22 & 1\\ 
+        \hline
+        157.92.26.0/24 & 3\\ 
+        \hline
+        157.92.192.0/19 & 2\\ 
+        \hline
+        157.92.128.0/19 & 2\\ 
+    \end{tabular}
+\end{center}
+
+Se analizan las que tienen interfaz de salida 1, además que la máscara del mismo largo:
+
+\begin{center}
+    \begin{tabular}{c|c}
+        157.92.60.0/22  & 001111 | 00  \\
+        \hline
+        157.92.56.0/22 &  001110 | 00  \\
+        \hline
+        157.92.48.0/22 &  110000 | 00
+    \end{tabular}
+\end{center}
+
+Puede unificarse el 157.92.60.0/22 y 157.92.56.0/22 que difieren en el último bit y agregarse en 157.92.56.0/21 ya que es el que tiene 0 en el último bit. Además se reduce en 1 la máscara. Tabla final para interfaz 1:
+
+\begin{center}
+    \begin{tabular}{c}
+
+        157.92.56.0/21 \\
+        \hline
+        157.92.48.0/22
+    \end{tabular}
+\end{center}
+
+Se analizan las que tienen interfaz de salida 2:
+
+\begin{center}
+    \begin{tabular}{c|c}
+        157.92.64.0/19   & 010 | 00000 \\
+        \hline
+        157.92.96.0/19 &  011 | 00000 \\
+        \hline
+        157.92.192.0/19  &  110 | 00000 \\
+        \hline
+        157.92.128.0/19 & 100 | 00000
+    \end{tabular}
+\end{center}
+
+157.92.64.0/19 y 157.92.96.0/19 se agregan en 157.92.64.0/18. Tabla final para la interfaz 2: 
+\begin{center}
+    \begin{tabular}{c}
+        157.92.64.0/18 \\
+        \hline
+        157.92.192.0/19 \\
+        \hline
+        157.92.128.0/19
+    \end{tabular}
+\end{center}
+
+Se analizan las que tienen interfaz de salida 3:
 
 
-\section{Control de flujo y congestion}
+\begin{center}
+    \begin{tabular}{c|c}
+        157.92.25.0/24 & 00011001 | 00000000 \\
+        \hline
+        157.92.26.0/24 & 00011010 | 00000000 \\
+    \end{tabular}
+\end{center}
+
+No son contiguas, ya no que difieren únicamente en el último bit.
+
+La tabla final será
+
+
+\begin{center}
+    \begin{tabular}{c|c}
+        Prefijo & Interfaz de salida  \\
+        \hline
+        \hline
+        157.92.64.0/18 & 2\\
+        \hline
+        157.92.56.0/21 & 1\\ 
+        \hline
+        157.92.25.0/24 & 3\\ 
+        \hline
+        157.92.52.0/22 & 0\\ 
+        \hline
+        157.92.48.0/22 & 1\\ 
+        \hline
+        157.92.26.0/24 & 3\\ 
+        \hline
+        157.92.192.0/19 & 2\\ 
+        \hline
+        157.92.128.0/19 & 2\\ 
+    \end{tabular}
+\end{center}
+
+
+A partir de la tabla de ruteo obtenida, indicar el puerto por el que egresaran los datagramas de acuerdo a la IP de destino 
+
+\begin{center}
+    \begin{tabular}{c|c|c|c}
+        Dirección IP destino & 15-23 &  Interfaz de salida  & comentario\\
+        \hline
+        \hline
+        157.92.25.144 & 00011001 & 3 &  157.92.25.0/24 a 3 \\
+        157.92.111.111 & 01101111 & 2 & 157.92.128.0/19 -> 110 en los bits 16-19 \\
+        157.92.55.85 & 00110111 & 0 & 157.92.\textbf{52}.0/22 -> 001101 | 00 \\
+        157.92.57.1 & 00111001 & 1 & 157.92.\textbf{56}.0/21 -> 00111 | 000 \\
+    \end{tabular}
+\end{center}
+
+Se obtuvo aplicando LPM
+\section{Control de flujo y congestión}
 
 Cada extremo de la transmisión TCP tiene su propio buffer, alli almacena datos TCP para pasarlos a la capa de aplicación. Si se reciben más datos de los que la capa de aplicación es capaz de consumir, ocurre un \textit{buffer overflow}. Para evitar esto, cada extremo comunica la cantidad de datos que puede recibir. A esto se lo llama \textbf{rwnd} o \textit{Receiver Window}. Va en el campo \textit{Window} del header de TCP.
 Cuando se recibe un cambio en \textbf{rwnd}, el emisor debe modificar la tasa de envío para no provocar un \textit{buffer overflow} ni subutilizar el buffer. 
@@ -491,7 +653,7 @@ $$ \mathrm{cwnd}_{n+1} = 1  $$
 \subsection{Pérdida de un solo paquete}
 
 Suponemos se está usando el algoritmo de control de congestion de Tahoe. 
-Recibib ACK duplicados indica que llegan algunos paquetes de la rafaga. Ocurre cuando se reciben 4 ACKs para el mismo segmento (el primer ACK es válido, luego llegan 3 ACKs duplicados). Dependiendo del algoritmo implementado se vuelve a slow start o se realiza un fast recovery
+Recibib ACK duplicados indica que llegan algunos paquetes de la rafaga. Ocurre cuando se reciben 4 ACKs para el mismo segmento (el primer ACK es válido, luego llegan 3 ACKs duplicados). Dependiendo del algoritmo implementado se vuelve a slow start o a Congestion Avoidance
 
 \subsubsection{Tahoe}
 
@@ -563,6 +725,8 @@ $$ \mathrm{cwnd}_{n+1} = 1  $$
 
 $$ \mathrm{cwnd}_{n+1} = \mathrm{cwnd}_n + \frac{\#\mathrm{ACK}}{\mathrm{cwnd}_n} $$
 
+
+En resumen, tanto Reno como Tahoe ante un RTO se vuelve a un Slow Start. La diferencia es que si se pierde algun paquete y se reciben ACKs duplicados, Reno luego de retransmitir va a Congestion Avoidance, mientras que Tahoe vuelve a slow start.
 
 \subsection{Ejercicios de Parcial}
 
